@@ -14,7 +14,7 @@ from pydantic import BaseModel
 app = FastAPI(
     title="贾玉元个人主页后端管理系统",
     description="基于 FastAPI 构建，提供项目数据读取与修改、图像文件上传和留言板管理功能。",
-    version="0.1.0",
+    version="0.1.1",
 )
 
 # 允许所有来源跨域（开发期）。生产可改成 ["https://libaweiyu.xyz"]

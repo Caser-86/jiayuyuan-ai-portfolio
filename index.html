@@ -686,6 +686,7 @@
         .portfolio-img-wrapper {
             position: relative;
             width: 100%;
+            aspect-ratio: 16 / 9;
             background-color: #0f172a;  /* 深色背景 */
             display: flex;              /* flex 居中显示 */
             justify-content: center;    /* 水平居中 */
@@ -696,8 +697,8 @@
         .portfolio-img {
             display: block;
             width: 100%;        /* 宽度跟 wrapper 一致 */
-            height: auto;       /* 高度自动等比缩放 ★关键★ */
-            max-height: 600px;  /* 限制最大高度 */
+            height: 100%;
+            object-fit: contain;
             transition: var(--transition-slow);
         }
 
@@ -871,7 +872,8 @@
         .modal-img {
             width: 100%;
             height: 350px;
-            object-fit: cover;
+            object-fit: contain;
+            background: #0f172a;
         }
 
         .modal-body {
