@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贾玉元 - 后台管理系统</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide 图标 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* ==========================================================================
+           1. 全局设计规范
+           ========================================================================== */
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(99,102,241,0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+            
+            --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ==========================================================================
+           2. 登录遮罩层
+           ========================================================================== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-normal);
+        }
+
+        .login-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .login-box {
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            padding: 48px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            text-align: center;
+            transform: scale(0.9);
+            transition: var(--transition-normal);
+        }
+
+        .login-overlay.active .login-box {
+            transform: scale(1);
+        }
+
+        .login-logo {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .login-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 32px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #f8fafc;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-normal);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: var(--font-title);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+            filter: brightness(1.05);
+        }
+
+        .login-error {
+            color: #ef4444;
+            font-size: 0.85rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: -8px;
+        }
+
+        /* ==========================================================================
+           3. 顶部导航与布局
+           ========================================================================== */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-title);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .logout-btn:hover {
+            color: #ef4444;
+            border-color: #fca5a5;
+            background-color: #fef2f2;
+        }
+
+        /* 后台工作区 */
+        .admin-main {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 40px;
+        }
+
+        /* 侧边菜单 */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-decoration: none;
+            background-color: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: #ffffff;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .menu-item.active i {
+            color: var(--primary);
+        }
+
+        /* ==========================================================================
+           4. 主面板与卡片
+           ========================================================================== */
+        .content-panel {
+            display: none;
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            margin-bottom: 30px;
+        }
+
+        .panel-header h2 {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .panel-header p {
+            color: var(--text-muted);
+        }
+
+        /* ==========================================================================
+           面板 1：修改项目 (Projects Grid)
+           ========================================================================== */
+        .projects-list-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .project-edit-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .project-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .project-card-header h3 {
+            font-family: var(--font-title);
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .project-card-num {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            background-color: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .project-edit-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .project-card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* ==========================================================================
+           面板 2：上传照片 (Images Grid)
+           ========================================================================== */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .image-upload-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .preview-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .upload-info h4 {
+            font-family: var(--font-title);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .upload-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .file-select-label {
+            align-self: flex-start;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition-normal);
+        }
+
+        .file-select-label:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        /* ==========================================================================
+           面板 3：合作留言 (Messages Table)
+           ========================================================================== */
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-item-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .msg-client-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .msg-client-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .msg-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .msg-meta-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .msg-badge {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .msg-body {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.6;
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--text-muted);
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+
+        /* ==========================================================================
+           5. 项目编辑模态框
+           ========================================================================== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-normal);
+            padding: 24px;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: var(--transition-normal);
+            position: relative;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-family: var(--font-title);
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #f8fafc;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            resize: vertical;
+            min-height: 80px;
+            transition: var(--transition-normal);
+        }
+
+        .form-textarea:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* ==========================================================================
+           6. Toast 弹出提示
+           ========================================================================== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #334155;
+            color: #ffffff;
+            padding: 14px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: var(--transition-normal);
+            pointer-events: none;
+        }
+
+        .toast.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            background-color: var(--accent);
+        }
+
+        .toast-error {
+            background-color: #ef4444;
+        }
+
+        /* ==========================================================================
+           7. 响应式布局
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .admin-main {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-list-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+       1. 登录遮罩弹窗
+       ========================================================================== */ -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-box">
+            <div class="login-logo"><i data-lucide="shield-check"></i> 贾玉元后台管理</div>
+            <p>请在下方输入管理员验证密码以登录管理面板</p>
+            <form class="login-form" id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="admin-pass" class="form-label">管理员密码</label>
+                    <input type="password" id="admin-pass" class="form-input" placeholder="输入密码" required>
+                </div>
+                <div class="login-error" id="login-error">
+                    <i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i> 密码错误，请重新输入
+                </div>
+                <button type="submit" class="btn btn-primary">验证登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+       2. 后台顶部导航
+       ========================================================================== */ -->
+    <header>
+        <div class="container header-content">
+            <a href="/admin" class="logo">
+                <i data-lucide="settings"></i> 贾玉元.AI 后台管理
+            </a>
+            <div class="user-menu">
+                <span style="font-size: 0.9rem; font-weight: 600;" id="user-status-text">管理员已登录</span>
+                <button class="logout-btn" onclick="handleLogout()">安全登出</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================================================
+       3. 工作区布局
+       ========================================================================== */ -->
+    <main class="container admin-main">
+        <!-- 侧边菜单 -->
+        <aside class="sidebar">
+            <button class="menu-item active" onclick="switchPanel('projects', this)">
+                <i data-lucide="layout-grid"></i> 修改项目列表
+            </button>
+            <button class="menu-item" onclick="switchPanel('images', this)">
+                <i data-lucide="image"></i> 上传个人照片
+            </button>
+            <button class="menu-item" onclick="switchPanel('messages', this)">
+                <i data-lucide="inbox"></i> 客户合作留言
+            </button>
+            <button class="menu-item" onclick="switchPanel('profile', this)">
+                <i data-lucide="user-circle-2"></i> 基本信息设置
+            </button>
+            <a href="/" target="_blank" class="menu-item" style="margin-top: auto; background-color: var(--primary-light); color: var(--primary);">
+                <i data-lucide="external-link"></i> 浏览个人主页
+            </a>
+        </aside>
+
+        <!-- 主操作区 -->
+        <section class="main-content">
+            <!-- 面板 1：修改项目 -->
+            <div class="content-panel active" id="panel-projects">
+                <div class="panel-header">
+                    <h2>项目列表修改</h2>
+                    <p>管理个人网站上展示的 6 个精选项目信息。</p>
+                </div>
+                <div class="projects-list-grid" id="projects-container">
+                    <!-- 项目卡片由 JS 动态渲染 -->
+                </div>
+            </div>
+
+            <!-- 面板 2：上传照片 -->
+            <div class="content-panel" id="panel-images">
+                <div class="panel-header">
+                    <h2>系统照片上传</h2>
+                    <p>通过在此上传新图片来覆盖替换您主页中使用的头像、背景以及各个项目截图。</p>
+                </div>
+                <div class="images-grid">
+                    <!-- 个人头像 -->
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/avatar.png" id="img-avatar" alt="头像预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>个人头像 (avatar.png)</h4>
+                            <p>圆形头像，建议宽高 1:1 分辨率且小于 1MB。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'avatar')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 首屏背景 -->
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/hero_bg.png" id="img-hero_bg" alt="背景预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>首屏背景图 (hero_bg.png)</h4>
+                            <p>大背景图，建议 16:9 比例，压缩优化以加快加载。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'hero_bg')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 项目图 1-6 -->
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project1.png" id="img-project1" alt="项目 1 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 1 缩略图 (project1.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 1 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project1')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project2.png" id="img-project2" alt="项目 2 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 2 缩略图 (project2.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 2 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project2')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project3.png" id="img-project3" alt="项目 3 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 3 缩略图 (project3.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 3 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'project3')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project4.png" id="img-project4" alt="项目 4 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 4 缩略图 (project4.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 4 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project4')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project5.png" id="img-project5" alt="项目 5 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 5 缩略图 (project5.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 5 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'project5')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-card">
+                        <div class="preview-box">
+                            <img src="assets/project6.png" id="img-project6" alt="项目 6 预览">
+                        </div>
+                        <div class="upload-info">
+                            <h4>项目 6 缩略图 (project6.png)</h4>
+                            <p>4:3 控制台系统截图，用于项目 6 背景展示。</p>
+                            <label class="file-select-label">
+                                <i data-lucide="upload"></i> 选择并上传图片
+                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project6')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板 4：基本信息设置 -->
+            <div class="content-panel" id="panel-profile">
+                <div class="panel-header">
+                    <h2>基本信息设置</h2>
+                    <p>配置首页"关于合作"区块的邮箱、微信、当前合作状态以及社交媒体链接。</p>
+                </div>
+
+                <form id="profile-form" style="max-width: 720px; display: flex; flex-direction: column; gap: 18px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">联系邮箱</label>
+                            <input type="email" id="pf-email" class="form-input" required style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">微信号</label>
+                            <input type="text" id="pf-wechat" class="form-input" required style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">微信备注</label>
+                        <input type="text" id="pf-wechatNote" class="form-input" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;" placeholder="例如：请备注合作意向">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">合作状态（中文）</label>
+                            <input type="text" id="pf-status" class="form-input" required style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;" placeholder="例如：接受委托中 / 暂不接单 / 档期已满">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">合作状态（英文）</label>
+                            <input type="text" id="pf-statusEn" class="form-input" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;" placeholder="例如：Available / Busy / Unavailable">
+                        </div>
+                    </div>
+
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:6px 0;">
+
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <h3 style="font-size:0.95rem;font-weight:600;color:var(--text-main);margin:0;">社交媒体与代码主页</h3>
+                        <button type="button" class="btn" onclick="addSocialRow()" style="background-color:#e0e7ff;color:#4338ca;font-size:0.85rem;padding:6px 12px;">+ 添加</button>
+                    </div>
+
+                    <div id="socials-editor" style="display:flex;flex-direction:column;gap:10px;">
+                        <!-- 动态行由 JS 渲染 -->
+                    </div>
+
+                    <div style="display:flex;gap:12px;margin-top:8px;">
+                        <button type="button" class="btn" onclick="fetchProfile()" style="background-color:#f1f5f9;color:var(--text-main);">取消修改</button>
+                        <button type="submit" class="btn btn-primary" style="margin-left:auto;">保存全部</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 面板 3：合作留言 -->
+            <div class="content-panel" id="panel-messages">
+                <div class="panel-header">
+                    <h2>合作留言箱</h2>
+                    <p>查看客户通过首页联系表单提交的所有合作意向留言（按时间降序排列）。</p>
+                </div>
+                <div class="messages-list" id="messages-container">
+                    <!-- 留言列表由 JS 动态渲染 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==========================================================================
+       4. 项目编辑模态框
+       ========================================================================== */ -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-project-title">编辑项目信息</h3>
+                <button class="modal-close" onclick="closeEditModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form class="edit-form" id="project-edit-form" onsubmit="submitProjectEdit(event)">
+                    <input type="hidden" id="edit-project-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-title" class="form-label">项目名称 *</label>
+                            <input type="text" id="edit-title" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-tags" class="form-label">技术栈标签 (逗号分隔) *</label>
+                            <input type="text" id="edit-tags" class="form-input" placeholder="例如: LangChain, FastAPI" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-client" class="form-label">客户类型 *</label>
+                            <input type="text" id="edit-client" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-duration" class="form-label">交付周期 *</label>
+                            <input type="text" id="edit-duration" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-tech" class="form-label">核心开发技术链 *</label>
+                        <input type="text" id="edit-tech" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-context" class="form-label">项目背景与痛点 *</label>
+                        <textarea id="edit-context" class="form-textarea" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-tech-details" class="form-label">技术实现路径 *</label>
+                        <textarea id="edit-tech-details" class="form-textarea" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-outcome" class="form-label">项目成果与商业价值 *</label>
+                        <textarea id="edit-outcome" class="form-textarea" required></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                        <button type="button" class="btn" onclick="closeEditModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+       5. 其它公共小组件
+       ========================================================================== */ -->
+    <div class="toast" id="system-toast">
+        <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+        <span id="toast-text">操作成功</span>
+    </div>
+
+    <!-- 全局拖拽上传提示（默认隐藏） -->
+    <div id="drop-hint" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(99,102,241,0.15); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center; pointer-events:none; border:4px dashed #6366f1;">
+        <div style="background:#1e293b; padding:32px 48px; border-radius:16px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+            <i data-lucide="upload-cloud" style="width:64px; height:64px; color:#6366f1;"></i>
+            <div style="font-size:22px; color:#f8fafc; margin-top:16px; font-weight:600;">松开鼠标上传图片</div>
+            <div style="font-size:14px; color:#94a3b8; margin-top:8px;">支持 PNG / JPG / WEBP / GIF</div>
+        </div>
+    </div>
+    <script>if(window.lucide) lucide.createIcons();</script>
+
+    <!-- ==========================================================================
+       6. JavaScript 核心逻辑
+       ========================================================================== */ -->
+    <script>
+        // ==========================================
+        // 1. 初始化
+        // ==========================================
+        lucide.createIcons();
+        let loadedProjects = [];
+
+        // 页面加载时验证登录
+        document.addEventListener('DOMContentLoaded', () => {
+            const password = localStorage.getItem('admin_password');
+            if (!password) {
+                showLoginOverlay();
+            } else {
+                testPasswordAndLoad(password);
+            }
+        });
+
+        // ==========================================
+        // 2. 身份验证与登录
+        // ==========================================
+        function showLoginOverlay() {
+            document.getElementById('login-overlay').classList.add('active');
+        }
+
+        function hideLoginOverlay() {
+            document.getElementById('login-overlay').classList.remove('active');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('admin-pass');
+            const password = passwordInput.value;
+            
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('admin_password', password);
+                    document.getElementById('login-error').style.display = 'none';
+                    hideLoginOverlay();
+                    showToast('登录验证成功！', 'success');
+                    loadDashboardData();
+                } else {
+                    document.getElementById('login-error').style.display = 'flex';
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('login-error').style.display = 'flex';
+            }
+        }
+
+        async function testPasswordAndLoad(password) {
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    loadDashboardData();
+                } else {
+                    localStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                }
+            } catch (err) {
+                localStorage.removeItem('admin_password');
+                showLoginOverlay();
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('admin_password');
+            location.reload();
+        }
+
+        // 获取通用的鉴权 Headers
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'X-Admin-Password': localStorage.getItem('admin_password') || ''
+            };
+        }
+
+        // ==========================================
+        // 3. 后台数据加载
+        // ==========================================
+        function loadDashboardData() {
+            fetchProjects();
+            fetchMessages();
+        }
+
+        // 获取并渲染项目列表
+        async function fetchProjects() {
+            try {
+                const res = await fetch('/api/projects');
+                const projects = await res.json();
+                loadedProjects = projects;
+                renderProjects(projects);
+            } catch (err) {
+                showToast('读取项目数据失败', 'error');
+            }
+        }
+
+        function renderProjects(projects) {
+            const container = document.getElementById('projects-container');
+            container.innerHTML = '';
+            
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="no-data" style="grid-column: span 2;">暂无项目数据</div>';
+                return;
+            }
+
+            projects.forEach((proj, idx) => {
+                const card = document.createElement('div');
+                card.className = 'project-edit-card';
+                card.innerHTML = `
+                    <div class="project-card-header">
+                        <h3>${proj.title}</h3>
+                        <span class="project-card-num">项目 ${idx + 1}</span>
+                    </div>
+                    <p>${proj.context || '暂无描述'}</p>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">
+                        <strong>技术栈:</strong> ${proj.tags.join(', ')}
+                    </div>
+                    <div class="project-card-footer">
+                        <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openEditModal(${proj.id})">
+                            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> 编辑信息
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // 获取并渲染客户留言列表
+        async function fetchMessages() {
+            try {
+                const res = await fetch('/api/messages', {
+                    headers: { 'X-Admin-Password': localStorage.getItem('admin_password') || '' }
+                });
+                if (res.status === 401) {
+                    localStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const messages = await res.json();
+                renderMessages(messages);
+            } catch (err) {
+                showToast('读取留言板失败', 'error');
+            }
+        }
+
+        function renderMessages(messages) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="no-data"><i data-lucide="inbox" style="width:40px; height:40px; margin-bottom:12px; opacity:0.5;"></i><p>目前还没有客户留言意向</p></div>';
+                lucide.createIcons();
+                return;
+            }
+
+            const projectTypeNames = {
+                'ai-app': 'AI 应用定制开发',
+                'automation': '智能工作流自动化',
+                'data-analysis': '数据智能分析',
+                'consulting': '技术咨询与指导',
+                'other': '其他'
+            };
+
+            messages.forEach(msg => {
+                const card = document.createElement('div');
+                card.className = 'message-item-card';
+                card.innerHTML = `
+                    <div class="msg-header">
+                        <div class="msg-client-info">
+                            <h3>${msg.name}</h3>
+                            <p><i data-lucide="mail" style="width: 14px; height: 14px;"></i> <a href="mailto:${msg.email}" style="color: inherit; text-decoration: none;">${msg.email}</a></p>
+                        </div>
+                        <span class="msg-time">${msg.created_at}</span>
+                    </div>
+                    <div class="msg-meta-row">
+                        <div class="msg-badge"><i data-lucide="tag" style="width: 14px; height: 14px; color: var(--primary);"></i> ${projectTypeNames[msg.project_type] || msg.project_type}</div>
+                        <div class="msg-badge"><i data-lucide="dollar-sign" style="width: 14px; height: 14px; color: var(--accent);"></i> 预算: ${msg.budget}</div>
+                    </div>
+                    <div class="msg-body">${msg.message}</div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // 4. 项目编辑表单提交
+        // ==========================================
+        const editModal = document.getElementById('edit-modal');
+        
+        function openEditModal(projectId) {
+            const proj = loadedProjects.find(p => p.id === projectId);
+            if (!proj) return;
+
+            document.getElementById('edit-project-id').value = proj.id;
+            document.getElementById('edit-title').value = proj.title;
+            document.getElementById('edit-tags').value = proj.tags.join(', ');
+            document.getElementById('edit-client').value = proj.client;
+            document.getElementById('edit-duration').value = proj.duration;
+            document.getElementById('edit-tech').value = proj.tech;
+            document.getElementById('edit-context').value = proj.context;
+            document.getElementById('edit-tech-details').value = proj.techDetails;
+            document.getElementById('edit-outcome').value = proj.outcome;
+
+            editModal.classList.add('active');
+        }
+
+        function closeEditModal() {
+            editModal.classList.remove('active');
+        }
+
+        async function submitProjectEdit(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-project-id').value;
+            
+            const payload = {
+                title: document.getElementById('edit-title').value,
+                tags: document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
+                client: document.getElementById('edit-client').value,
+                duration: document.getElementById('edit-duration').value,
+                tech: document.getElementById('edit-tech').value,
+                context: document.getElementById('edit-context').value,
+                techDetails: document.getElementById('edit-tech-details').value,
+                outcome: document.getElementById('edit-outcome').value
+            };
+
+            try {
+                const res = await fetch(`/api/projects/${id}`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    localStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    closeEditModal();
+                    showToast('项目修改成功！', 'success');
+                    fetchProjects();
+                } else {
+                    showToast('修改失败，请重试', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，保存失败', 'error');
+            }
+        }
+
+        // ==========================================
+        // 5. 图像文件上传逻辑
+        // ==========================================
+        async function uploadImage(inputElement, imageType) {
+            // 兼容拖拽调用：参数可能是 input 元素或 File 对象
+            const file = (inputElement instanceof File) ? inputElement : (inputElement.files && inputElement.files[0]);
+            if (!file) return;
+            return await doUpload(file, imageType, inputElement);
+        }
+
+        // 核心上传逻辑（拖拽和按钮共用）
+        async function doUpload(file, imageType, inputElement) {
+            // 调试日志：F12 Console 可看到
+            console.log('[upload] 准备上传', { imageType, fileName: file.name, fileSize: file.size, fileType: file.type });
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('image_type', imageType);
+
+            const adminPwd = localStorage.getItem('admin_password') || '';
+            console.log('[upload] 鉴权头长度:', adminPwd.length, '(0=未登录)');
+
+            try {
+                showToast('正在上传文件...', 'info');
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'X-Admin-Password': adminPwd
+                    },
+                    body: formData
+                });
+
+                console.log('[upload] 响应状态:', res.status, res.statusText);
+
+                if (res.status === 401) {
+                    showToast('管理员鉴权已失效，请重新登录', 'error');
+                    localStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                console.log('[upload] 响应内容:', data);
+
+                if (data.success) {
+                    showToast('图片上传替换成功！', 'success');
+                    // 动态更新页面预览图，加时间戳规避浏览器缓存
+                    const imgPreview = document.getElementById(`img-${imageType}`);
+                    if (imgPreview) {
+                        imgPreview.src = `assets/${imageType}.png?t=${new Date().getTime()}`;
+                    }
+                    // 重置 input 以便同一个文件可以重复选择触发（拖拽时 inputElement 为 undefined，跳过）
+                    if (inputElement && inputElement.value !== undefined) {
+                        inputElement.value = '';
+                    }
+                } else {
+                    showToast(data.detail || '上传图片失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求错误，图片上传失败', 'error');
+                console.error('[upload] 异常:', err);
+            }
+        }
+
+        // ==========================================
+        // 7. 全局拖拽上传（直接把图片文件拖到页面任何地方即可）
+        // ==========================================
+        let dragCounter = 0;
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            // 显示拖拽提示
+            const hint = document.getElementById('drop-hint');
+            if (hint) hint.style.display = 'flex';
+        });
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                const hint = document.getElementById('drop-hint');
+                if (hint) hint.style.display = 'none';
+            }
+        });
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            const hint = document.getElementById('drop-hint');
+            if (hint) hint.style.display = 'none';
+            const files = e.dataTransfer ? e.dataTransfer.files : null;
+            if (!files || files.length === 0) {
+                showToast('未识别到拖入的文件', 'error');
+                return;
+            }
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                showToast('请拖入图片文件（PNG / JPG / WEBP 等）', 'error');
+                return;
+            }
+            // 弹窗让用户选"上传到哪个位置"，默认项目1
+            const choice = window.prompt(
+                '要把这张图上传到哪个位置？\n' +
+                '1 - 项目 1 缩略图（默认）\n' +
+                '2 - 项目 2 缩略图\n' +
+                '3 - 项目 3 缩略图\n' +
+                '4 - 项目 4 缩略图\n' +
+                '5 - 项目 5 缩略图\n' +
+                '6 - 项目 6 缩略图\n' +
+                'a - 头像 avatar\n' +
+                'b - 主页背景 hero_bg\n' +
+                'q - 微信二维码\n\n' +
+                '直接回车 = 上传到项目 1',
+                '1'
+            );
+            let target = 'project1';
+            const map = { '1': 'project1', '2': 'project2', '3': 'project3', '4': 'project4', '5': 'project5', '6': 'project6', 'a': 'avatar', 'b': 'hero_bg', 'q': 'wechat_qr' };
+            if (choice && map[choice.toLowerCase()]) {
+                target = map[choice.toLowerCase()];
+            } else if (choice && choice.trim() !== '' && choice !== '1') {
+                showToast('输入无效，已取消上传', 'error');
+                return;
+            }
+            doUpload(file, target, undefined);
+        });
+
+        // ==========================================
+        // 6. UI 控制辅助函数
+        // ==========================================
+        // Tab 切换
+        function switchPanel(panelId, btnElement) {
+            const panels = document.querySelectorAll('.content-panel');
+            const buttons = document.querySelectorAll('.menu-item');
+            
+            panels.forEach(p => p.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`panel-${panelId}`).classList.add('active');
+            btnElement.classList.add('active');
+
+            // 切换标签时主动刷新对应的数据
+            if (panelId === 'projects') fetchProjects();
+            if (panelId === 'messages') fetchMessages();
+            if (panelId === 'profile') fetchProfile();
+        }
+
+        // 展示 Toast 弹出框
+        let toastTimer = null;
+        function showToast(text, type = 'success') {
+            const toast = document.getElementById('system-toast');
+            const toastText = document.getElementById('toast-text');
+            
+            // 设定图标和背景类
+            toast.className = 'toast';
+            if (type === 'success') {
+                toast.classList.add('toast-success');
+                toast.querySelector('i').setAttribute('data-lucide', 'check-circle');
+            } else if (type === 'error') {
+                toast.classList.add('toast-error');
+                toast.querySelector('i').setAttribute('data-lucide', 'x-circle');
+            } else {
+                toast.querySelector('i').setAttribute('data-lucide', 'info');
+            }
+            
+            toastText.innerText = text;
+            lucide.createIcons();
+            
+            toast.classList.add('active');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // ==========================================
+        // 7. 基本信息管理
+        // ==========================================
+        // 拉取 /api/profile 并填入表单
+        async function fetchProfile() {
+            try {
+                const res = await fetch('/api/profile');
+                if (!res.ok) throw new Error('拉取失败');
+                const data = await res.json();
+                document.getElementById('pf-email').value = data.email || '';
+                document.getElementById('pf-wechat').value = data.wechat || '';
+                document.getElementById('pf-wechatNote').value = data.wechatNote || '';
+                document.getElementById('pf-status').value = data.status || '';
+                document.getElementById('pf-statusEn').value = data.statusEn || '';
+                renderSocialsEditor(data.socials || []);
+            } catch (err) {
+                console.error('拉取基本信息失败:', err);
+                showToast('拉取基本信息失败', 'error');
+            }
+        }
+
+        // 渲染社交链接编辑器
+        function renderSocialsEditor(socials) {
+            const container = document.getElementById('socials-editor');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!socials || socials.length === 0) {
+                // 显示 1 个空行作为起点
+                socials = [{icon: '', label: '', url: ''}];
+            }
+            socials.forEach(s => addSocialRow(s));
+        }
+
+        // 添加一行
+        function addSocialRow(data) {
+            data = data || {icon: '', label: '', url: ''};
+            const container = document.getElementById('socials-editor');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.style.cssText = 'display:grid;grid-template-columns:160px 1fr 36px;gap:8px;align-items:center;padding:8px;background:#f8fafc;border-radius:8px;';
+            row.innerHTML = ''
+                + '<select class="form-input" data-field="icon" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;background:white;">'
+                +   '<option value="">— 选择图标 —</option>'
+                +   '<option value="github">GitHub</option>'
+                +   '<option value="linkedin">LinkedIn</option>'
+                +   '<option value="twitter-x">Twitter / X</option>'
+                +   '<option value="facebook">Facebook</option>'
+                +   '<option value="instagram">Instagram</option>'
+                +   '<option value="youtube">YouTube</option>'
+                +   '<option value="message-circle">微信</option>'
+                +   '<option value="send">Telegram</option>'
+                +   '<option value="globe">个人网站</option>'
+                +   '<option value="globe-2">Blog</option>'
+                +   '<option value="mail">邮箱</option>'
+                +   '<option value="phone">电话</option>'
+                +   '<option value="link">通用链接</option>'
+                +   '<option value="briefcase">作品集</option>'
+                +   '<option value="code">技术博客</option>'
+                +   '<option value="rss">RSS</option>'
+                + '</select>'
+                + '<div style="display:flex;gap:6px;">'
+                +   '<input type="text" data-field="label" placeholder="显示名称（如 GitHub）" value="' + (data.label || '').replace(/"/g, '&quot;') + '" style="flex:0 0 140px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;">'
+                +   '<input type="url" data-field="url" placeholder="https://..." value="' + (data.url || '').replace(/"/g, '&quot;') + '" style="flex:1;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;">'
+                + '</div>'
+                + '<button type="button" onclick="this.parentElement.remove()" title="删除" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;height:36px;width:36px;display:flex;align-items:center;justify-content:center;">'
+                +   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></svg>'
+                + '</button>';
+            // 设置选中的 icon
+            const sel = row.querySelector('select[data-field="icon"]');
+            if (data.icon) {
+                const opt = sel.querySelector('option[value="' + data.icon + '"]');
+                if (opt) opt.selected = true;
+                else {
+                    // 自定义图标名（用户手填）
+                    const customOpt = document.createElement('option');
+                    customOpt.value = data.icon;
+                    customOpt.textContent = data.icon + ' (自定义)';
+                    customOpt.selected = true;
+                    sel.appendChild(customOpt);
+                }
+            }
+            container.appendChild(row);
+        }
+
+        // 提交表单保存
+        // 收集 socials 编辑器中的所有行
+        function collectSocials() {
+            const rows = document.querySelectorAll('#socials-editor > div');
+            const result = [];
+            rows.forEach(row => {
+                const icon = row.querySelector('[data-field="icon"]').value.trim();
+                const label = row.querySelector('[data-field="label"]').value.trim();
+                const url = row.querySelector('[data-field="url"]').value.trim();
+                if (url) {  // 只保留有 URL 的
+                    result.push({icon, label, url});
+                }
+            });
+            return result;
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const payload = {
+                email: document.getElementById('pf-email').value.trim(),
+                wechat: document.getElementById('pf-wechat').value.trim(),
+                wechatNote: document.getElementById('pf-wechatNote').value.trim(),
+                status: document.getElementById('pf-status').value.trim(),
+                statusEn: document.getElementById('pf-statusEn').value.trim(),
+                socials: collectSocials()
+            };
+            try {
+                const res = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Password': localStorage.getItem('admin_password') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || '基本信息已更新', 'success');
+                } else {
+                    showToast(data.detail || '保存失败', 'error');
+                }
+            } catch (err) {
+                console.error('保存基本信息失败:', err);
+                showToast('保存失败：' + err.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

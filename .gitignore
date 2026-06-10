@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*\.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.user
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary upload directory
+upload/
+tmp/
+temp/
+
+# Temporary scripts
+test_*.py
+test_*.png
+check_*.py
+check_*.log
+debug_*.py
+diagnose*.py
+fix*.py
+gen_*.py
+inspect*.py
+show_*.py
+renew_*.py
+patch_*.py
+analyze*.py
+_*.png
+
+# Third-party tool source
+tools/
+
+# AI assistant configs
+GEMINI.md
+CLAUDE.md
+.cursorrules
+
+# Credentials
+*.pem
+*.key
+*.crt
+.env
+.env.local
+*.token
+credentials.json
+
+# Backup
+*.bak
+*.bak.py
+*.old
+*.orig
+
+# Logs
+*.log
+logs/
+*.out
+*.err
