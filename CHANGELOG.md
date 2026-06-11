@@ -7,7 +7,38 @@
 
 ---
 
-## [v0.1.1] - 2026-06-11
+## [v0.1.1] - 2026-06-10
+
+### 🐛 修复
+
+- **项目卡片图片显示**
+  - `object-fit: cover` → `contain`（图片完整显示，不再被裁切）
+  - 动态 `aspect-ratio` 适配图片自自然比例（零留白）
+  - 最终采用最稳定的 `width: 100%; height: auto` 方案
+- **图片上传缓存**
+  - 自定义 `NoCacheStaticFiles` 中间件：直接在静态资源响应中追加 `Cache-Control: no-store, no-cache, must-revalidate`
+  - 解决 FastAPI StaticFiles 绕过 HTTP middleware 导致 no-cache 头不生效的问题
+  - 涵盖 project/avatar/hero_bg/wechat_qr 前缀的所有图片
+- **项目 1 缩略图上传**
+  - 放宽文件选择器 `accept` 属性（支持更多图片格式）
+  - 完整诊断 + Python 脚本兜底上传路径
+- **基本信息设置面板** — 修复 JS 引用 `panel-profile` 但 HTML 元素不存在的问题
+- **客户评价模块** — 后端 `enabled` 字段控制显隐，前端 CSS + JS 双重防御
+
+### ✨ 新增
+
+- **全局拖拽上传**：把图片文件直接拖到 admin 页面任意位置 → 弹窗选上传位置 → 完成
+- **Git 版本管理**：初始化本地仓库，添加 .gitignore / README / CHANGELOG
+
+### 🎨 体验优化
+
+- 导航栏添加半透明白底 + 模糊效果（提高文字可读性）
+- 上传图片 URL 自动加 `?v=Date.now()` 时间戳防缓存
+- admin 后台文件选择器放宽图片格式限制
+
+---
+
+## [v0.1.0] - 2026-06-10
 
 ### 修复
 
