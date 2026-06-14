@@ -37,6 +37,9 @@ D:\Files\备用\
 ├── admin.html             # 后台管理界面
 ├── requirements.txt       # Python 依赖
 ├── implementation_plan.md # 项目实现计划
+├── README.md              # 项目说明文档
+├── CHANGELOG.md           # 版本更新日志
+├── .gitignore             # Git 忽略规则
 ├── data/                  # JSON 数据存储
 │   ├── projects.json
 │   ├── messages.json
@@ -49,7 +52,8 @@ D:\Files\备用\
 │   └── wechat_qr.png
 ├── upload/                # 临时上传目录（不入版本）
 ├── auto_deploy.py         # 阿里云自动化部署脚本
-└── deploy-aliyun.sh       # 阿里云 ECS 部署 Shell
+├── deploy-aliyun.sh       # 阿里云 ECS 部署 Shell
+└── deploy.ps1             # Windows PowerShell 部署脚本
 ```
 
 ## 🚀 本地启动
