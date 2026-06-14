@@ -28,8 +28,8 @@ upload/
 tmp/
 temp/
 
-# Temporary scripts
-test_*.py
+# Temporary scripts (exclude tests/ directory)
+/test_*.py
 test_*.png
 check_*.py
 check_*.log
