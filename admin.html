@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide 图标 -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
 
     <style>
         /* ==========================================================================
@@ -404,7 +404,7 @@
         .preview-box img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .upload-info {
@@ -437,6 +437,9 @@
             align-items: center;
             gap: 4px;
             transition: var(--transition-normal);
+            border: none;
+            font-family: inherit;
+            line-height: 1.5;
         }
 
         .file-select-label:hover {
@@ -445,7 +448,12 @@
         }
 
         .hidden-file-input {
-            display: none;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
 
         /* ==========================================================================
@@ -788,10 +796,10 @@
                         <div class="upload-info">
                             <h4>个人头像 (avatar.png)</h4>
                             <p>圆形头像，建议宽高 1:1 分辨率且小于 1MB。</p>
-                            <label class="file-select-label">
+                            <button class="file-select-label" type="button" onclick="document.getElementById('input-avatar').click()">
                                 <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'avatar')">
-                            </label>
+                            </button>
+                            <input type="file" id="input-avatar" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'avatar')">
                         </div>
                     </div>
 
@@ -803,97 +811,15 @@
                         <div class="upload-info">
                             <h4>首屏背景图 (hero_bg.png)</h4>
                             <p>大背景图，建议 16:9 比例，压缩优化以加快加载。</p>
-                            <label class="file-select-label">
+                            <button class="file-select-label" type="button" onclick="document.getElementById('input-hero_bg').click()">
                                 <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'hero_bg')">
-                            </label>
+                            </button>
+                            <input type="file" id="input-hero_bg" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'hero_bg')">
                         </div>
                     </div>
 
-                    <!-- 项目图 1-6 -->
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project1.png" id="img-project1" alt="项目 1 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 1 缩略图 (project1.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 1 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project1')">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project2.png" id="img-project2" alt="项目 2 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 2 缩略图 (project2.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 2 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project2')">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project3.png" id="img-project3" alt="项目 3 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 3 缩略图 (project3.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 3 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'project3')">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project4.png" id="img-project4" alt="项目 4 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 4 缩略图 (project4.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 4 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project4')">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project5.png" id="img-project5" alt="项目 5 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 5 缩略图 (project5.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 5 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/*" onchange="uploadImage(this, 'project5')">
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="image-upload-card">
-                        <div class="preview-box">
-                            <img src="assets/project6.png" id="img-project6" alt="项目 6 预览">
-                        </div>
-                        <div class="upload-info">
-                            <h4>项目 6 缩略图 (project6.png)</h4>
-                            <p>4:3 控制台系统截图，用于项目 6 背景展示。</p>
-                            <label class="file-select-label">
-                                <i data-lucide="upload"></i> 选择并上传图片
-                                <input type="file" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project6')">
-                            </label>
-                        </div>
-                    </div>
+                    <!-- 项目图 1-6（由 JS 动态渲染，支持多图） -->
+                    <div id="project-images-container"></div>
                 </div>
             </div>
 
@@ -1031,7 +957,7 @@
        5. 其它公共小组件
        ========================================================================== */ -->
     <div class="toast" id="system-toast">
-        <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+        <span id="toast-icon" style="display:inline-flex; align-items:center;"></span>
         <span id="toast-text">操作成功</span>
     </div>
 
@@ -1152,8 +1078,87 @@
                 const projects = await res.json();
                 loadedProjects = projects;
                 renderProjects(projects);
+                renderProjectImageCards(projects);
             } catch (err) {
                 showToast('读取项目数据失败', 'error');
+            }
+        }
+
+        // 渲染项目图片管理卡片（支持多图）
+        function renderProjectImageCards(projects) {
+            const container = document.getElementById('project-images-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            projects.forEach((proj) => {
+                const projNum = proj.id + 1;
+                const images = proj.images || (proj.img ? [proj.img] : []);
+                const ts = Date.now();
+
+                // 预览缩略图
+                const previews = images.map((src, i) => {
+                    const isMain = i === 0;
+                    const fname = src.replace('assets/', '');
+                    // 用 data 属性 + 事件委托避免 onclick 字符串转义问题
+                    return `
+                        <div style="position:relative;display:inline-block;margin:2px;">
+                            <img src="${src}?t=${ts}" style="width:80px;height:60px;object-fit:contain;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+                            ${!isMain ? `<button class="btn-delete-img" data-project-id="${proj.id}" data-filename="${fname}" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#ef4444;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:10px;line-height:18px;text-align:center;padding:0;">&times;</button>` : ''}
+                        </div>`;
+                }).join('');
+
+                const card = document.createElement('div');
+                card.className = 'image-upload-card';
+                card.innerHTML = `
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${previews}</div>
+                    <div class="upload-info">
+                        <h4>项目 ${projNum} 缩略图 (${images.length} 张)</h4>
+                        <p>第一张为主图，后续图片自动轮播展示。</p>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="file-select-label" type="button" onclick="document.getElementById('input-project${projNum}-main').click()">
+                                <i data-lucide="upload"></i> 替换主图
+                            </button>
+                            <button class="file-select-label" type="button" onclick="document.getElementById('input-project${projNum}-extra').click()" style="background-color:#f0fdf4;color:#16a34a;">
+                                <i data-lucide="plus"></i> 添加图片
+                            </button>
+                        </div>
+                        <input type="file" id="input-project${projNum}-main" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project${projNum}')">
+                        <input type="file" id="input-project${projNum}-extra" class="hidden-file-input" accept="image/*" onchange="uploadImage(this, 'project${projNum}_extra')">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // 事件委托：删除按钮
+            container.querySelectorAll('.btn-delete-img').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const pid = parseInt(btn.dataset.projectId);
+                    const fname = btn.dataset.filename;
+                    deleteProjectImage(pid, fname);
+                });
+            });
+
+            lucide.createIcons();
+        }
+
+        // 删除项目额外图片
+        async function deleteProjectImage(projectId, filename) {
+            if (!confirm('确定删除这张图片？')) return;
+            try {
+                const res = await fetch(`/api/projects/${projectId}/images/${encodeURIComponent(filename)}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('图片已删除', 'success');
+                    fetchProjects(); // 刷新
+                } else {
+                    showToast(data.detail || '删除失败', 'error');
+                }
+            } catch (err) {
+                showToast('删除失败', 'error');
             }
         }
 
@@ -1319,35 +1324,38 @@
         // 5. 图像文件上传逻辑
         // ==========================================
         async function uploadImage(inputElement, imageType) {
-            // 兼容拖拽调用：参数可能是 input 元素或 File 对象
-            const file = (inputElement instanceof File) ? inputElement : (inputElement.files && inputElement.files[0]);
-            if (!file) return;
-            return await doUpload(file, imageType, inputElement);
+            try {
+                console.log('[upload] uploadImage called, imageType:', imageType);
+                const file = (inputElement instanceof File) ? inputElement : (inputElement.files && inputElement.files[0]);
+                console.log('[upload] file:', file ? file.name : 'NULL');
+                if (!file) { console.log('[upload] No file selected, returning'); return; }
+                await doUpload(file, imageType, inputElement);
+            } catch (e) {
+                console.error('[upload] uploadImage error:', e);
+                showToast('上传出错: ' + e.message, 'error');
+            }
         }
 
         // 核心上传逻辑（拖拽和按钮共用）
         async function doUpload(file, imageType, inputElement) {
-            // 调试日志：F12 Console 可看到
-            console.log('[upload] 准备上传', { imageType, fileName: file.name, fileSize: file.size, fileType: file.type });
+            console.log('[upload] doUpload start', { imageType, fileName: file.name, fileSize: file.size, fileType: file.type });
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('image_type', imageType);
 
             const adminPwd = localStorage.getItem('admin_password') || '';
-            console.log('[upload] 鉴权头长度:', adminPwd.length, '(0=未登录)');
+            console.log('[upload] adminPwd length:', adminPwd.length);
 
             try {
                 showToast('正在上传文件...', 'info');
                 const res = await fetch('/api/upload', {
                     method: 'POST',
-                    headers: {
-                        'X-Admin-Password': adminPwd
-                    },
+                    headers: { 'X-Admin-Password': adminPwd },
                     body: formData
                 });
 
-                console.log('[upload] 响应状态:', res.status, res.statusText);
+                console.log('[upload] response status:', res.status);
 
                 if (res.status === 401) {
                     showToast('管理员鉴权已失效，请重新登录', 'error');
@@ -1357,25 +1365,27 @@
                 }
 
                 const data = await res.json();
-                console.log('[upload] 响应内容:', data);
+                console.log('[upload] response data:', data);
 
                 if (data.success) {
                     showToast('图片上传替换成功！', 'success');
-                    // 动态更新页面预览图，加时间戳规避浏览器缓存
                     const imgPreview = document.getElementById(`img-${imageType}`);
                     if (imgPreview) {
                         imgPreview.src = `assets/${imageType}.png?t=${new Date().getTime()}`;
                     }
-                    // 重置 input 以便同一个文件可以重复选择触发（拖拽时 inputElement 为 undefined，跳过）
                     if (inputElement && inputElement.value !== undefined) {
                         inputElement.value = '';
+                    }
+                    // 如果是项目图片，刷新整个图片管理面板以显示新图片
+                    if (imageType.startsWith('project')) {
+                        fetchProjects();
                     }
                 } else {
                     showToast(data.detail || '上传图片失败', 'error');
                 }
             } catch (err) {
-                showToast('网络请求错误，图片上传失败', 'error');
-                console.error('[upload] 异常:', err);
+                console.error('[upload] fetch error:', err);
+                showToast('网络请求错误: ' + err.message, 'error');
             }
         }
 
@@ -1417,31 +1427,63 @@
                 showToast('请拖入图片文件（PNG / JPG / WEBP 等）', 'error');
                 return;
             }
-            // 弹窗让用户选"上传到哪个位置"，默认项目1
-            const choice = window.prompt(
-                '要把这张图上传到哪个位置？\n' +
-                '1 - 项目 1 缩略图（默认）\n' +
-                '2 - 项目 2 缩略图\n' +
-                '3 - 项目 3 缩略图\n' +
-                '4 - 项目 4 缩略图\n' +
-                '5 - 项目 5 缩略图\n' +
-                '6 - 项目 6 缩略图\n' +
-                'a - 头像 avatar\n' +
-                'b - 主页背景 hero_bg\n' +
-                'q - 微信二维码\n\n' +
-                '直接回车 = 上传到项目 1',
-                '1'
-            );
-            let target = 'project1';
-            const map = { '1': 'project1', '2': 'project2', '3': 'project3', '4': 'project4', '5': 'project5', '6': 'project6', 'a': 'avatar', 'b': 'hero_bg', 'q': 'wechat_qr' };
-            if (choice && map[choice.toLowerCase()]) {
-                target = map[choice.toLowerCase()];
-            } else if (choice && choice.trim() !== '' && choice !== '1') {
-                showToast('输入无效，已取消上传', 'error');
-                return;
-            }
-            doUpload(file, target, undefined);
+            // 用自定义弹窗让用户选择上传位置
+            showUploadTargetModal(file);
         });
+
+        // 自定义上传目标选择弹窗
+        let pendingUploadFile = null;
+        function showUploadTargetModal(file) {
+            pendingUploadFile = file;
+            // 创建弹窗
+            let modal = document.getElementById('upload-target-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'upload-target-modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:#fff;border-radius:16px;padding:32px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                        <h3 style="margin:0 0 8px;font-size:1.1rem;font-weight:700;">选择上传位置</h3>
+                        <p style="color:#64748b;font-size:0.85rem;margin:0 0 20px;">要把这张图上传到哪个位置？</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="upload-target-options">
+                            <button data-target="project1" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 1</button>
+                            <button data-target="project2" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 2</button>
+                            <button data-target="project3" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 3</button>
+                            <button data-target="project4" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 4</button>
+                            <button data-target="project5" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 5</button>
+                            <button data-target="project6" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">项目 6</button>
+                            <button data-target="avatar" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">头像</button>
+                            <button data-target="hero_bg" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">背景图</button>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:16px;">
+                            <button id="upload-target-cancel" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:0.9rem;">取消</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(modal);
+
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeUploadTargetModal();
+                });
+                document.getElementById('upload-target-cancel').addEventListener('click', closeUploadTargetModal);
+                modal.querySelectorAll('#upload-target-options button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const target = btn.dataset.target;
+                        closeUploadTargetModal();
+                        if (pendingUploadFile) {
+                            doUpload(pendingUploadFile, target, undefined);
+                            pendingUploadFile = null;
+                        }
+                    });
+                });
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeUploadTargetModal() {
+            const modal = document.getElementById('upload-target-modal');
+            if (modal) modal.style.display = 'none';
+            pendingUploadFile = null;
+        }
 
         // ==========================================
         // 6. UI 控制辅助函数
@@ -1468,19 +1510,23 @@
         function showToast(text, type = 'success') {
             const toast = document.getElementById('system-toast');
             const toastText = document.getElementById('toast-text');
+            const toastIcon = document.getElementById('toast-icon');
             
             // 设定图标和背景类
             toast.className = 'toast';
+            let iconName = 'check-circle';
             if (type === 'success') {
                 toast.classList.add('toast-success');
-                toast.querySelector('i').setAttribute('data-lucide', 'check-circle');
+                iconName = 'check-circle';
             } else if (type === 'error') {
                 toast.classList.add('toast-error');
-                toast.querySelector('i').setAttribute('data-lucide', 'x-circle');
+                iconName = 'x-circle';
             } else {
-                toast.querySelector('i').setAttribute('data-lucide', 'info');
+                iconName = 'info';
             }
             
+            // 直接设置 icon 的 innerHTML，避免 lucide 替换后找不到元素
+            toastIcon.innerHTML = `<i data-lucide="${iconName}" style="width: 20px; height: 20px;"></i>`;
             toastText.innerText = text;
             lucide.createIcons();
             
@@ -1525,6 +1571,17 @@
             socials.forEach(s => addSocialRow(s));
         }
 
+        // URL sanitize：只允许 http/https 协议，防止 javascript: XSS
+        function sanitizeUrl(url) {
+            if (!url) return '';
+            url = url.trim();
+            if (url.toLowerCase().startsWith('javascript:') || url.toLowerCase().startsWith('data:')) return '';
+            if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+                url = 'https://' + url;
+            }
+            return url;
+        }
+
         // 添加一行
         function addSocialRow(data) {
             data = data || {icon: '', label: '', url: ''};
@@ -1537,7 +1594,7 @@
                 +   '<option value="">— 选择图标 —</option>'
                 +   '<option value="github">GitHub</option>'
                 +   '<option value="linkedin">LinkedIn</option>'
-                +   '<option value="twitter-x">Twitter / X</option>'
+                +   '<option value="twitter">Twitter / X</option>'
                 +   '<option value="facebook">Facebook</option>'
                 +   '<option value="instagram">Instagram</option>'
                 +   '<option value="youtube">YouTube</option>'
@@ -1586,7 +1643,7 @@
                 const label = row.querySelector('[data-field="label"]').value.trim();
                 const url = row.querySelector('[data-field="url"]').value.trim();
                 if (url) {  // 只保留有 URL 的
-                    result.push({icon, label, url});
+                    result.push({icon, label, url: sanitizeUrl(url)});
                 }
             });
             return result;

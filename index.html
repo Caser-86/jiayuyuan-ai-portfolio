@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Lucide 图标 -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
 
     <!-- Schema.org 结构化数据 (Person) -->
     <script type="application/ld+json">
@@ -668,7 +668,6 @@
             transition: var(--transition-normal);
             display: flex;
             flex-direction: column;
-            aspect-ratio: 4/3.1;
             opacity: 1;
             transform: scale(1);
         }
@@ -686,23 +685,104 @@
         .portfolio-img-wrapper {
             position: relative;
             width: 100%;
+            height: 220px;
             background-color: #0f172a;  /* 深色背景 */
-            display: flex;              /* flex 居中显示 */
-            justify-content: center;    /* 水平居中 */
-            align-items: center;        /* 垂直居中 */
             overflow: hidden;
         }
 
+        /* 轮播容器 */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-slide img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* 轮播箭头 */
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .portfolio-card:hover .carousel-arrow { opacity: 1; }
+        .carousel-arrow:hover { background: rgba(0,0,0,0.7); }
+        .carousel-arrow-left { left: 8px; }
+        .carousel-arrow-right { right: 8px; }
+
+        /* 轮播圆点 */
+        .carousel-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .portfolio-card:hover .carousel-dots { opacity: 1; }
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.3s;
+        }
+        .carousel-dot.active { background: #fff; }
+
         .portfolio-img {
             display: block;
-            width: 100%;        /* 宽度跟 wrapper 一致 */
-            height: auto;       /* 高度自动等比缩放 ★关键★ */
-            max-height: 600px;  /* 限制最大高度 */
+            width: 100%;
+            height: auto;
             transition: var(--transition-slow);
         }
 
         .portfolio-card:hover .portfolio-img {
-            transform: scale(1.08);
+            transform: scale(1.02);
         }
 
         .portfolio-overlay {
@@ -870,8 +950,9 @@
 
         .modal-img {
             width: 100%;
-            height: 350px;
-            object-fit: cover;
+            height: auto;
+            max-height: 600px;
+            object-fit: contain;
         }
 
         .modal-body {
@@ -2331,11 +2412,11 @@
         // 根据标签推断 data-category 属性
         function inferCategory(tags) {
             const tagStr = (tags || []).join(' ').toLowerCase();
-            if (tagStr.includes('pytorch') || tagStr.includes('echarts') || tagStr.includes('pandas') || tagStr.includes('rpa') || tagStr.includes('n8n')) {
-                return 'data-analysis';
-            }
-            if (tagStr.includes('rag') || tagStr.includes('langchain') || tagStr.includes('autogen') || tagStr.includes('llm') || tagStr.includes('translation') || tagStr.includes('agents')) {
+            if (tagStr.includes('rag') || tagStr.includes('langchain') || tagStr.includes('autogen') || tagStr.includes('llm') || tagStr.includes('translation') || tagStr.includes('agents') || tagStr.includes('openai')) {
                 return 'ai-app';
+            }
+            if (tagStr.includes('pytorch') || tagStr.includes('echarts') || tagStr.includes('pandas')) {
+                return 'data-analysis';
             }
             return 'automation';
         }
@@ -2345,21 +2426,50 @@
             const category = inferCategory(p.tags);
             const tagsHTML = (p.tags || []).map(t => `<span class="project-tag">${t}</span>`).join('');
             const excerpt = (p.context || '').slice(0, 80) + '…';
-            // 给图片加 ?v= 时间戳（防止浏览器缓存导致上传后看不到效果）
-            const imgSrc = p.img + '?v=' + Date.now();
-            return `
-                <div class="portfolio-card reveal-element" data-category="${category}" data-project-index="${index}">
-                    <div class="card-img-wrapper">
-                        <img src="${imgSrc}" alt="${p.title} 项目截图" class="card-img" loading="lazy">
-                        <div class="card-overlay">
+            const images = p.images || (p.img ? [p.img] : []);
+            const ts = Date.now();
+
+            let imgHTML;
+            if (images.length <= 1) {
+                // 单图，无轮播
+                const imgSrc = (images[0] || '') + '?v=' + ts;
+                imgHTML = `
+                    <div class="portfolio-img-wrapper">
+                        <img src="${imgSrc}" alt="${p.title} 项目截图" class="portfolio-img" loading="lazy">
+                        <div class="portfolio-overlay">
                             <button class="view-details-btn" data-project-index="${index}">\u67e5\u770b\u8be6\u60c5</button>
                         </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-tags">${tagsHTML}</div>
-                        <h3 class="card-title">${p.title}</h3>
-                        <p class="card-excerpt">${excerpt}</p>
-                        <a href="#" class="view-details-link" data-project-index="${index}">
+                    </div>`;
+            } else {
+                // 多图，轮播
+                const slides = images.map((src, i) =>
+                    `<div class="carousel-slide"><img src="${src}?v=${ts}" alt="${p.title} 截图${i+1}" loading="lazy"></div>`
+                ).join('');
+                const dots = images.map((_, i) =>
+                    `<button class="carousel-dot${i===0?' active':''}" data-slide="${i}"></button>`
+                ).join('');
+                imgHTML = `
+                    <div class="portfolio-img-wrapper">
+                        <div class="carousel-container" data-project-index="${index}" data-current="0" data-total="${images.length}">
+                            <div class="carousel-track">${slides}</div>
+                            <button class="carousel-arrow carousel-arrow-left" data-dir="-1">&#8249;</button>
+                            <button class="carousel-arrow carousel-arrow-right" data-dir="1">&#8250;</button>
+                            <div class="carousel-dots">${dots}</div>
+                        </div>
+                        <div class="portfolio-overlay">
+                            <button class="view-details-btn" data-project-index="${index}">\u67e5\u770b\u8be6\u60c5</button>
+                        </div>
+                    </div>`;
+            }
+
+            return `
+                <div class="portfolio-card reveal-element" data-category="${category}" data-project-index="${index}">
+                    ${imgHTML}
+                    <div class="portfolio-info">
+                        <div class="portfolio-tags">${tagsHTML}</div>
+                        <h3>${p.title}</h3>
+                        <p>${excerpt}</p>
+                        <a href="#" class="portfolio-link" data-project-index="${index}">
                             \u9605\u8bfb\u6848\u4f8b <i data-lucide="arrow-right"></i>
                         </a>
                     </div>
@@ -2376,6 +2486,63 @@
             // 让新卡片也触发入场动画
             grid.querySelectorAll('.reveal-element').forEach(el => revealObserver.observe(el));
             // 注：图片自适应比例由 CSS height: auto 完成，无需 JS
+            // 初始化轮播
+            initCarousels();
+        }
+
+        // ========== 轮播逻辑 ==========
+        let carouselTimers = [];
+
+        function initCarousels() {
+            // 清除旧定时器
+            carouselTimers.forEach(t => clearInterval(t));
+            carouselTimers = [];
+
+            document.querySelectorAll('.carousel-container').forEach(container => {
+                const track = container.querySelector('.carousel-track');
+                const dots = container.querySelectorAll('.carousel-dot');
+                const leftArrow = container.querySelector('.carousel-arrow-left');
+                const rightArrow = container.querySelector('.carousel-arrow-right');
+                const total = parseInt(container.dataset.total);
+                let current = 0;
+
+                function goToSlide(idx) {
+                    current = ((idx % total) + total) % total;
+                    track.style.transform = `translateX(-${current * 100}%)`;
+                    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+                    container.dataset.current = current;
+                }
+
+                // 箭头
+                leftArrow.addEventListener('click', (e) => { e.stopPropagation(); goToSlide(current - 1); });
+                rightArrow.addEventListener('click', (e) => { e.stopPropagation(); goToSlide(current + 1); });
+
+                // 圆点
+                dots.forEach(dot => {
+                    dot.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        goToSlide(parseInt(dot.dataset.slide));
+                    });
+                });
+
+                // 自动轮播（每4秒）
+                const timer = setInterval(() => goToSlide(current + 1), 10000);
+                carouselTimers.push(timer);
+
+                // 悬停暂停
+                const card = container.closest('.portfolio-card');
+                card.addEventListener('mouseenter', () => clearInterval(timer));
+                card.addEventListener('mouseleave', () => {
+                    const t = setInterval(() => goToSlide(current + 1), 10000);
+                    carouselTimers.push(t);
+                });
+            });
+
+            // 页面卸载时清理所有轮播定时器，防止内存泄漏
+            window.addEventListener('beforeunload', () => {
+                carouselTimers.forEach(t => clearInterval(t));
+                carouselTimers = [];
+            });
         }
 
         // 从后端 /api/projects 拉取数据并渲染
@@ -2408,6 +2575,7 @@
             const setVisible = () => {
                 if (section) section.style.setProperty('display', '', 'important');
                 if (navLink) navLink.style.setProperty('display', '', 'important');
+                maybeStartAutoPlay();
             };
             const setHidden = () => {
                 if (section) section.style.setProperty('display', 'none', 'important');
@@ -2681,7 +2849,8 @@
             if (!data) return;
 
             // 填充内容
-            modalImg.src = data.img;
+            const images = data.images || (data.img ? [data.img] : []);
+            modalImg.src = (images[0] || '') + '?v=' + Date.now();
             modalImg.alt = data.title + ' 的大图预览';
             modalTitle.innerText = data.title;
             modalContext.innerText = data.context || '';
@@ -2714,7 +2883,7 @@
         // 使用事件委托：监听 portfolio-grid 容器上的点击，动态卡片也能响应
         const portfolioGrid = document.getElementById('portfolio-grid');
         portfolioGrid.addEventListener('click', (e) => {
-            const btn = e.target.closest('.view-details-btn, .view-details-link');
+            const btn = e.target.closest('.view-details-btn, .portfolio-link');
             if (!btn) return;
             e.preventDefault();
             const idx = parseInt(btn.getAttribute('data-project-index'));
@@ -2831,8 +3000,14 @@
             }
         }
 
-        // 启动轮播
-        startAutoPlay();
+        // 启动轮播（仅在评价区块可见时启动）
+        function maybeStartAutoPlay() {
+            const section = document.getElementById('testimonials');
+            if (section && section.style.display !== 'none') {
+                startAutoPlay();
+            }
+        }
+        maybeStartAutoPlay();
 
         // ==========================================
         // 10. 表单验证与模拟 AJAX 提交
@@ -2917,7 +3092,17 @@
                 if (!isValid) isFormValid = false;
             });
 
-            if (!isFormValid) return; // 校验失败拦截
+            if (!isFormValid) {
+                // 滚动到第一个错误字段
+                for (const key of Object.keys(fields)) {
+                    if (!fields[key].validate(fields[key].input.value)) {
+                        fields[key].input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        fields[key].input.focus();
+                        break;
+                    }
+                }
+                return;
+            }
 
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;

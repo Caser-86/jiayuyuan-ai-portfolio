@@ -7,7 +7,72 @@
 
 ---
 
+## [v0.1.3] - 2026-06-14
+
+### ✨ 新增
+
+- **多图片轮播展示** — 每个项目支持上传多张截图，前端卡片自动轮播（10秒间隔），悬停暂停 + 左右箭头 + 圆点指示器
+- **后台多图管理** — 替换主图 / 添加额外图片 / 删除图片，实时预览
+- **`/api/profile` 接口** — GET 获取基本信息，POST 保存基本信息
+- **`/api/testimonials` 接口** — GET/POST 支持客户评价数据读写
+- **`/api/upload` 删除图片接口** — 支持删除额外图片（`DELETE /api/upload`）
+
+### 🐛 修复
+
+- **项目卡片 CSS 类名不匹配** — JS 生成 `card-content/card-tags`，CSS 定义 `portfolio-info/portfolio-tags`，导致文字无样式
+- **上传按钮点击无效** — `lucide.createIcons()` 把 `<i>` 替换为 SVG 后拦截 `<label>` 点击，改用 `<button>` + JS 触发
+- **`showToast` 报错 `Cannot read properties of null`** — `querySelector('i')` 返回 null，改用 `<span>` 容器
+- **项目分类筛选失效** — 前端用数组索引而非 `proj.id` 计算分类，顺序错乱时错位
+- **删除按钮无效** — `onclick` 中文件名含特殊字符导致 JS 语法错误，改用 `data-*` 属性 + 事件委托
+- **删除 API 404** — URL 传 `project1_2.png` 但数组存 `assets/project1_2.png`，兼容两种格式
+- **上传额外图片后预览不刷新** — 上传完成后自动调用 `fetchProjects()` 刷新面板
+- **客户评价轮播隐藏时白跑定时器** — 改为按需启动
+- **表单校验失败不滚动** — 移动端看不到错误提示，添加 `scrollIntoView`
+- **项目4描述拼写错误** — "预先加载 of 行业标准" → "预先加载的行业标准"
+- **社交图标 `twitter-x` 无效** — Lucide 无此图标名，改为 `twitter`
+- **项目5 `img` → `images` 字段遗漏** — 统一为 `images` 数组
+
+### 🔒 安全加固
+
+- CORS 限制为指定域名
+- 上传文件大小限制 5MB + 扩展名校验
+- 登录接口频率限制（每 IP 每分钟 10 次）
+- 管理员密码改为环境变量读取
+- JSON 写入前自动 `.bak` 备份
+- 删除图片路径穿越防护
+- 社交链接 `sanitizeUrl` XSS 防护
+- CDN 脚本版本锁定 `lucide@1.17.0`
+- 依赖版本锁定（`>=` → `==`）
+
+### 🧪 新增接口
+
+- `GET /health` — 健康检查
+- `GET /robots.txt` — SEO 支持
+- `GET /sitemap.xml` — 搜索引擎站点地图
+- 自定义 404 JSON 响应
+
+---
+
 ## [v0.1.2] - 2026-06-14
+
+### 🐛 修复
+
+- **`/api/testimonials` 接口缺失** — 前端调用返回 404，客户评价模块无法启用
+- **项目分类筛选失效** — `inferCategory` 逻辑错误，RPA/n8n 被错误归类为 `data-analysis`
+- **管理员密码硬编码** — 改为从环境变量 `ADMIN_PASSWORD` 读取
+- **CDN 脚本版本未锁定** — `lucide@latest` → `lucide@1.17.0`
+- **上传无文件大小限制** — 添加 5MB 上限校验
+- **上传无文件扩展名校验** — 仅允许 `.png/.jpg/.jpeg/.webp/.gif/.bmp`
+- **CORS 全开** — 限制为指定域名（可通过 `ALLOWED_ORIGINS` 环境变量配置）
+- **依赖版本未锁定** — `>=` → `==` 精确匹配
+- **无健康检查接口** — 添加 `/health`
+- **无 robots.txt / sitemap.xml** — 添加 SEO 支持
+- **无 404 错误页面** — 添加自定义 404 JSON 响应
+- **轮播定时器内存泄漏** — 页面卸载时清理所有 `setInterval`
+- **拖拽上传用 `window.prompt`** — 改用自定义弹窗选择上传位置
+- **社交链接编辑器 XSS 风险** — URL 字段添加 `sanitizeUrl` 防护
+- **JSON 数据无备份** — 写入前自动创建 `.bak` 备份文件
+- **登录接口无频率限制** — 每 IP 每分钟最多 10 次登录尝试
 
 ### 🧪 测试
 

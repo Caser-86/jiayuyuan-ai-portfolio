@@ -2,7 +2,7 @@
 
 > 一个现代化的 AI 产品经理 / 独立开发者个人主页，含前后端、后台管理与阿里云部署。
 
-![Version](https://img.shields.io/badge/version-v0.1.2-blue)
+![Version](https://img.shields.io/badge/version-v0.1.3-blue)
 ![Python](https://img.shields.io/badge/python-3.11+-green)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal)
 ![License](https://img.shields.io/badge/license-MIT-orange)
@@ -85,7 +85,7 @@ python auto_deploy.py
 
 ## 📝 版本
 
-当前版本：**v0.1.2**（添加供应链安全检查测试）
+当前版本：**v0.1.3**（多图片轮播 + 安全加固 + 全面 BUG 修复）
 
 详见 [CHANGELOG.md](CHANGELOG.md)。
 
