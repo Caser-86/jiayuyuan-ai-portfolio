@@ -1,0 +1,14 @@
+{
+  "email": "776706958@qq.com",
+  "wechat": "libaweiyu",
+  "wechatNote": "请备注合作意向",
+  "status": "接受委托中",
+  "statusEn": "Available",
+  "socials": [
+    {
+      "icon": "github",
+      "label": "GitHub",
+      "url": "https://github.com/Caser-86"
+    }
+  ]
+}
