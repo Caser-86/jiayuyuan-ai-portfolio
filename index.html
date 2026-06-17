@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贾玉元 - AI Agent 开发者个人主页</title>
+    <title>篱笆微雨 - AI Agent 开发者作品集</title>
     <meta name="description" content="贾玉元，资深 AI Agent 开发者，专注于智能解决方案、大模型应用、企业级工作流自动化、语义搜索与数据分析，致力于通过 AI 智能体帮助企业实现业务自动化升级。">
     <meta name="keywords" content="贾玉元, AI Agent, 人工智能智能体, 大语言模型, 自动化工作流, 知识库搜索, 机器学习, 自由职业开发者">
     <meta name="author" content="贾玉元">
 
     <!-- Open Graph 标签 -->
-    <meta property="og:title" content="贾玉元 - AI Agent 开发者个人主页">
+    <meta property="og:title" content="AI项目实践集 - AI Agent 开发者作品集">
     <meta property="og:description" content="贾玉元，资深 AI Agent 开发者，专注于智能解决方案、大模型应用、企业级工作流自动化、语义搜索与数据分析。">
     <meta property="og:image" content="assets/avatar.png">
     <meta property="og:type" content="website">
@@ -33,7 +33,7 @@
       "image": "assets/avatar.png",
       "alumniOf": "知名高校人工智能实验室",
       "knowsAbout": ["Artificial Intelligence", "AI Agents", "Machine Learning", "Natural Language Processing", "FastAPI", "Python", "Workflow Automation"],
-      "url": "https://jiayuyuan.ai"
+      "url": "https://libaweiyu.xyz"
     }
     </script>
 
@@ -1782,6 +1782,32 @@
             0% { opacity: 1; transform: translate(-50%, 0); }
             100% { opacity: 0; transform: translate(-50%, 15px); }
         }
+        @keyframes scanLine {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+        @keyframes scanDot {
+            0% { left: 0; }
+            100% { left: calc(100% - 6px); }
+        }
+        @keyframes dotPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(124,58,237,0.4);
+            }
+            50% { 
+                transform: scale(1.2);
+                box-shadow: 0 0 0 3px rgba(124,58,237,0);
+            }
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        @keyframes subtitleGlow {
+            0%, 100% { text-shadow: 0 0 4px rgba(124,58,237,0.15); }
+            50% { text-shadow: 0 0 10px rgba(124,58,237,0.3), 0 0 18px rgba(124,58,237,0.1); }
+        }
         /* 客户评价区块默认隐藏（CSS 兜底，避免 JS 加载前出现"假数据"），由 JS 根据后端 enabled 决定是否显示 */
         #testimonials,
         #nav-testimonials-link {
@@ -1800,8 +1826,14 @@
        ========================================================================== */ -->
     <header id="header">
         <div class="container nav-container">
-            <a href="#hero" class="logo">
-                <i data-lucide="bot"></i>贾玉元.AI
+            <a href="#hero" class="logo" style="flex-direction:column;align-items:flex-start;gap:2px;">
+                <span style="display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="bot"></i>篱笆微雨
+                </span>
+                <span style="display:flex;align-items:center;gap:4px;margin-left:28px;">
+                    <span style="font-size:0.62em; font-weight:500; background: linear-gradient(135deg, #7c3aed, #4f46e5) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important; letter-spacing: 2px;">AI项目实践集</span>
+                    <span style="display:inline-block;width:2px;height:12px;background:#7c3aed;animation:blink 1s step-end infinite;border-radius:1px;"></span>
+                </span>
             </a>
             
             <ul class="nav-links" id="nav-links">
@@ -2277,8 +2309,9 @@
         <div class="container">
             <div class="footer-content">
                 <div>
-                    <a href="#hero" class="footer-logo">
-                        <span>贾玉元</span>.AI
+                    <a href="#hero" class="footer-logo" style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;gap:0;">
+                        <span>篱笆微雨</span>
+                        <span style="font-size:0.65em; font-weight:400; opacity:0.55; margin-top:2px;">AI项目实践集</span>
                     </a>
                     <p style="font-size: 0.85rem; margin-top: 8px; color: #64748b;">用智能自动化赋能企业未来</p>
                 </div>
@@ -2292,11 +2325,14 @@
             </div>
             <div style="border-top: 1px solid #1e293b; margin-top: 32px; padding-top: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
                 <div class="footer-copyright">
-                    © 2026 贾玉元. All rights reserved.
+                    © 2026 篱笆微雨. All rights reserved.
                 </div>
                 <div style="font-size: 0.8rem; color: #475569;">
                     Designed with ♥ using pure CSS & JS
                 </div>
+            </div>
+            <div style="text-align: center; margin-top: 16px; font-size: 0.75rem; color: #64748b;">
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #64748b; text-decoration: none;">浙ICP备2026044460号-1</a>
             </div>
         </div>
     </footer>
@@ -2475,7 +2511,7 @@
                 ).join('');
                 imgHTML = `
                     <div class="portfolio-img-wrapper">
-                        <div class="carousel-container" data-project-index="${index}" data-current="0" data-current="0" data-total="${images.length}">
+                        <div class="carousel-container" data-project-index="${index}" data-current="0" data-total="${images.length}">
                             <div class="carousel-track">${slides}</div>
                             <button class="carousel-arrow carousel-arrow-left" data-dir="-1">&#8249;</button>
                             <button class="carousel-arrow carousel-arrow-right" data-dir="1">&#8250;</button>

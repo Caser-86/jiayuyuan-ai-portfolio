@@ -360,7 +360,7 @@ async def upload_image(
                             _write_json_unlocked(PROJECTS_FILE, projects)
             except Exception:
                 pass  # 回滚失败也不应掩盖原始错误
-        raise HTTPException(status_code=500, detail=f"保存图片文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail="保存图片文件失败，请稍后重试")
 
 
 @app.delete("/api/projects/{project_id}/images/{img_filename}")
