@@ -396,7 +396,7 @@ async def upload_image(
         filename = "avatar.png"
     elif base_type == "hero_bg":
         filename = "hero_bg.png"
-    elif base_type in [f"project{i}" for i in range(1, 7)]:
+    elif base_type in [f"project{i}" for i in range(1, 13)]:
         if is_extra:
             # 计算下一个序号（找最大序号+1，避免删除后覆盖）
             proj_idx = int(base_type.replace("project", ""))
@@ -449,7 +449,7 @@ async def upload_image(
         return {"success": True, "message": f"图片已成功上传为 {filename}", "filename": filename}
     except Exception as e:
         # 文件写入失败时，回滚 JSON 中的引用（仅对 projectN_extra 类型）
-        if is_extra and base_type in [f"project{i}" for i in range(1, 7)]:
+        if is_extra and base_type in [f"project{i}" for i in range(1, 13)]:
             try:
                 with _file_lock:
                     projects = read_json_file(PROJECTS_FILE, [], _locked=True)
