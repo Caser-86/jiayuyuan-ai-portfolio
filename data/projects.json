@@ -71,9 +71,7 @@
     "client": "自主孵化产品",
     "duration": "持续迭代",
     "tech": "Next.js 16 / React 19 / TypeScript / Tailwind CSS 4 / Zustand / PostgreSQL / Redis / BullMQ / OpenAI Compatible API (DeepSeek) / Zod / Docker / Vitest / Playwright / R2/S3",
-    "images": [
-      "assets/project4.png"
-    ],
+    "images": [],
     "context": "互动叙事类产品的核心难点在于如何让 AI 生成的剧情保持连贯性、分支合理性和完整的故事弧线。市面上的 AI 故事工具大多要么无限续写导致剧情失控，要么是预设脚本缺乏真正的随机性和分支差异。用户渴望「输入一句灵感，就能获得一个可玩的、有结局的、分支丰富的完整故事体验」，而非无尽的开放续写。",
     "techDetails": "基于 Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 构建的全栈互动叙事平台。后端采用 Next.js Route Handlers 作为 API 层，通过 OpenAI 兼容接口接入 DeepSeek 大模型进行叙事生成。核心架构包含六大服务模块：narrative-service 负责 LLM 叙事生成与 JSON Schema 约束输出，内置多层 fallback 兜底（模型异常/超时/余额不足/非标返回均有降级策略）；story-state-service 管理状态推进、上下文压缩与选择效果应用（变量/flags/inventory/relations/endingPotential）；story-arc-service 控制故事长度规划（短篇 7-12 步 / 中篇 20-40 步 / 长篇 50-100 步）、五阶段推进（setup→development→crisis→resolution→ending）与结局收束判断；safety-service 提供输入/输出安全检查与版权替换；asset-service 封装可选的场景图异步生成链路（Redis + BullMQ + Worker + R2/S3 对象存储）；user-service 处理指纹用户识别与数据清理。客户端使用 Zustand 管理全局状态与会话恢复，支持断点续玩。配套完整的工程化体系：Docker Compose 四服务编排（app/worker/db/redis）、Vitest 单元测试 + Playwright E2E、PostgreSQL 持久化、Owner Token 权限校验、只读分享 replay、JSON/Markdown 导出、可观测性统计与成本追踪。",
     "outcome": "实现了从一句灵感输入到完整可玩互动故事的全流程闭环。用户输入灵感后可获得包含标题、场景描写、NPC 对话、正文和三项分支选择的首幕场景，通过选择推进后续分支剧情，故事按五阶段自然收束至结局。支持会话恢复（刷新页面可继续）、只读分享链接、JSON/Markdown 导出。系统具备输入输出安全防护、每日 Token/图片限额、Owner Token 权限校验、Stream Token 签名等生产级安全机制。场景图生成作为可选增强模块，默认关闭不影响主流程。全量本地测试覆盖单元、API 契约和 E2E 三个层级，Docker 一键部署可用。",
