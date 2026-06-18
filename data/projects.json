@@ -93,5 +93,22 @@
     "techDetails": "基于 Unity 6 + URP 渲染管线构建的 2D 横版射击游戏。架构上采用事件驱动设计（GameEvents 静态事件总线），解耦 UI、战斗、音效等模块。核心玩法系统包括：4 人小队实时切换系统（每个角色独立生命值、武器等级和技能冷却）、武器形态切换系统（3 把武器 × 3 种形态 = 9 种射击模式）、物理驱动的 2D 控制器（跳跃缓冲+土狼时间+蹲伏碰撞体调整）。敌人 AI 包含 4 种类型（步枪兵、盾牌兵、无人机、榴弹兵）和 3 阶段 MiniBoss 战。数据层使用 ScriptableObject 定义角色/敌人/武器属性，支持热编辑。美术和音频完全由 Editor 脚本程序化生成（AudioGenerator 程序化合成 WAV 音效、MusicGenerator 生成 BGM、Procedural Sprite Generator 生成像素风格精灵图），实现零外部依赖。配套 NUnit 单元测试覆盖生命值系统和武器运行时逻辑。",
     "outcome": "完成了一款可玩的 2D 横版射击游戏垂直切片，包含 3 个完整区域（海滩→村庄→战壕）+ Boss 竞技场、4 个可操作角色（Aila/Bruno/Mara/Niko，各有独特技能）、9 种射击模式、4 种敌人类型和 3 阶段 Boss 战。全部美术素材（15+ 精灵图）和音效（9 种音效 + 3 首 BGM）均由代码程序化生成，零外部资源依赖。支持一键构建 Windows 可执行文件，完整项目可通过 Unity 6 打开直接运行。",
     "github_url": ""
+  },
+  {
+    "id": 5,
+    "title": "实时多源 AI 行业情报仓",
+    "tags": [
+      "CrewAI",
+      "Multi-Agent",
+      "Streamlit"
+    ],
+    "client": "自主孵化产品",
+    "duration": "持续迭代",
+    "tech": "Python 3.11 / CrewAI 1.14 / Streamlit 1.57 / DuckDuckGo / DeepSeek V4 / Pydantic v2 / Plotly / SQLite / pytest",
+    "images": [],
+    "context": "企业做行业研究、竞品分析、热点追踪时，需要在多个信息源之间反复切换搜索、阅读、整理，耗时且容易遗漏关键情报。传统 AI 问答工具缺乏实时搜索能力，输出的行业分析往往基于过时的训练数据，无法反映最新市场动态。需要一个能自动搜索、自动分析、自动可视化的智能情报系统。",
+    "techDetails": "基于 CrewAI 多智能体编排框架构建的实时情报分析系统。架构采用 Cache-first 工作流：用户输入关键词后先查 SQLite 缓存（支持 TTL），未命中则通过 DuckDuckGo 实时搜索获取最新来源，再由 CrewAI 编排 Analyst 和 Visualizer 两个 Agent 协同工作——Analyst 基于搜索结果生成结构化行业报告（InsightReport），Visualizer 将报告转化为图表结构（ChartSpec）。系统实现了三模式稳定性保障：live 模式走完整 CrewAI 管道，fallback 模式在 LLM/Agent 失败时自动降级为规则生成的保守报告，cache 模式直接返回 SQLite 缓存结果秒级响应。数据层使用 Pydantic v2 约束所有结构化输出（SourceItem、InsightReport、ChartSpec、RunMeta、RunEvent），搜索工具内置 URL 去重和坏链接跳过机制。前端使用 Streamlit 构建交互式看板，支持运行日志、Plotly 图表、Markdown 报告、来源链接、JSON/Markdown 下载。配套预热脚本和评估脚本用于演示就绪检查。",
+    "outcome": "实现了从关键词输入到结构化情报报告的全流程自动化。用户输入研究主题后，系统自动搜索最新来源、生成行业分析报告（含执行摘要、关键发现、市场信号、竞争格局、机会与风险、置信度评分）、生成雷达图可视化、保留所有来源链接。三模式设计确保演示永不崩溃：即使 LLM 不可用也能通过 fallback 或 cache 模式给出可展示输出。支持预设关键词一键演示，报告支持 JSON 和 Markdown 格式导出。",
+    "github_url": "https://github.com/Caser-86/realtime-ai-intel-warehouse"
   }
 ]
