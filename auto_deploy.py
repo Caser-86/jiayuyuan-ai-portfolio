@@ -103,10 +103,11 @@ def main():
     out, _, code = run(ssh, "cat /etc/os-release | head -3 && echo --- && which python3 dnf yum nginx systemctl 2>&1 | head -10 && echo --- && uname -a", show=False)
     print(out)
 
-    # 2. 创建项目目录（保留用户上传的 assets 图片）
+    # 2. 创建项目目录（保留用户上传的 assets 图片和 data 数据）
     step("2/7  准备远程目录")
-    # 备份用户通过管理后台上传的图片，部署后恢复
+    # 备份用户通过管理后台上传的图片和数据（含 github_url 等修改）
     run(ssh, f"if [ -d {REMOTE_DIR}/assets ]; then cp -r {REMOTE_DIR}/assets /tmp/jiayuyuan-assets-backup && echo 'assets backed up'; fi")
+    run(ssh, f"if [ -d {REMOTE_DIR}/data ]; then cp -r {REMOTE_DIR}/data /tmp/jiayuyuan-data-backup && echo 'data backed up'; fi")
     run(ssh, f"rm -rf {REMOTE_DIR} && mkdir -p {REMOTE_DIR}")
     log(f"创建 {REMOTE_DIR}", "OK")
 
@@ -122,10 +123,10 @@ def main():
     sftp.close()
     log("项目上传完成", "OK")
 
-    # 3.5 恢复备份的 assets 图片（用户通过管理后台上传的图片）
-    # 用服务器上的版本覆盖本地默认图片，因为用户的图片是通过管理后台上传的最新版
+    # 3.5 恢复备份的 assets 图片和 data 数据
     run(ssh, f"if [ -d /tmp/jiayuyuan-assets-backup ]; then cp -rf /tmp/jiayuyuan-assets-backup/* {REMOTE_DIR}/assets/ 2>/dev/null; rm -rf /tmp/jiayuyuan-assets-backup; echo 'assets restored'; fi")
-    log("用户上传的图片已恢复", "OK")
+    run(ssh, f"if [ -d /tmp/jiayuyuan-data-backup ]; then cp -rf /tmp/jiayuyuan-data-backup/* {REMOTE_DIR}/data/ 2>/dev/null; rm -rf /tmp/jiayuyuan-data-backup; echo 'data restored'; fi")
+    log("用户上传的图片和数据已恢复", "OK")
 
     # 4. 上传 deploy-aliyun.sh
     step("4/7  上传部署脚本")
