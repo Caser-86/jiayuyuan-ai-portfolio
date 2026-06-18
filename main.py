@@ -425,13 +425,18 @@ async def upload_image(
                 _write_json_unlocked(PROJECTS_FILE, projects)
         else:
             filename = f"{base_type}.png"
-            # 上传主图时也更新 projects.json 的 images 数组
+            # 上传主图时只替换 images 数组的第一项，保留额外图片
             proj_idx = int(base_type.replace("project", ""))
             with _file_lock:
                 projects = read_json_file(PROJECTS_FILE, [], _locked=True)
                 proj = next((p for p in projects if p["id"] == proj_idx - 1), None)
                 if proj:
-                    proj["images"] = [f"assets/{filename}"]
+                    existing = proj.get("images", [])
+                    new_main = f"assets/{filename}"
+                    if existing:
+                        existing[0] = new_main
+                    else:
+                        proj["images"] = [new_main]
                     _write_json_unlocked(PROJECTS_FILE, projects)
     else:
         raise HTTPException(status_code=400, detail="未知的图片类型分类，无法保存")
