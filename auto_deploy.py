@@ -103,8 +103,10 @@ def main():
     out, _, code = run(ssh, "cat /etc/os-release | head -3 && echo --- && which python3 dnf yum nginx systemctl 2>&1 | head -10 && echo --- && uname -a", show=False)
     print(out)
 
-    # 2. 创建项目目录
+    # 2. 创建项目目录（保留用户上传的 assets 图片）
     step("2/7  准备远程目录")
+    # 备份用户通过管理后台上传的图片，部署后恢复
+    run(ssh, f"if [ -d {REMOTE_DIR}/assets ]; then cp -r {REMOTE_DIR}/assets /tmp/jiayuyuan-assets-backup && echo 'assets backed up'; fi")
     run(ssh, f"rm -rf {REMOTE_DIR} && mkdir -p {REMOTE_DIR}")
     log(f"创建 {REMOTE_DIR}", "OK")
 
@@ -119,6 +121,11 @@ def main():
     sftp_put_dir(sftp, LOCAL_DIR, REMOTE_DIR)
     sftp.close()
     log("项目上传完成", "OK")
+
+    # 3.5 恢复备份的 assets 图片（用户通过管理后台上传的图片）
+    # 用服务器上的版本覆盖本地默认图片，因为用户的图片是通过管理后台上传的最新版
+    run(ssh, f"if [ -d /tmp/jiayuyuan-assets-backup ]; then cp -rf /tmp/jiayuyuan-assets-backup/* {REMOTE_DIR}/assets/ 2>/dev/null; rm -rf /tmp/jiayuyuan-assets-backup; echo 'assets restored'; fi")
+    log("用户上传的图片已恢复", "OK")
 
     # 4. 上传 deploy-aliyun.sh
     step("4/7  上传部署脚本")
