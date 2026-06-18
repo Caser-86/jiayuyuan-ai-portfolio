@@ -23,7 +23,7 @@
     "context": "企业做竞品分析、技术趋势研究、产业洞察时，需要大量人工搜索、阅读、整理资料，效率低且容易遗漏关键信息。InsightGraph 是一个基于 LangGraph 的多智能体深度研究引擎，能够自动完成从任务拆解、多源信息采集、证据评分到长篇报告生成的全流程。",
     "techDetails": "采用 LangGraph StateGraph 编排 6 个智能体协同工作：Planner 负责任务分解与查询策略，Collector/Executor 执行多轮工具调用与预算控制，Analyst 提炼发现与竞争矩阵，Critic 进行质量评审与引用校验，Reporter 生成最终报告。支持 web search、GitHub、SEC、PDF/HTML 抓取、本地文档等多源数据输入。内置证据评分、引用支撑检查、URL 校验等质量保障机制，确保报告结论均有据可查。提供 FastAPI REST + WebSocket 接口，支持异步任务管理、实时事件流、Markdown/HTML 报告导出，以及零构建前端 Dashboard 控制台。",
     "outcome": "实现了从研究任务提交到长篇报告生成的全自动化流程。用户可在统一 Dashboard 中完成提交任务、观察执行、查看报告、核对证据的闭环操作。报告中的关键论断可追溯到 citation support、URL validation 和 evidence drilldown，确保研究结论可信、可验证。支持离线 deterministic 模式用于 CI 测试，也支持 live-research 模式接入真实搜索与 LLM 进行深度研究。",
-    "github_url": ""
+    "github_url": "https://github.com/Caser-86/InsightGraph"
   },
   {
     "id": 1,
@@ -67,7 +67,7 @@
     "context": "高考志愿填报是每年千万考生家庭面临的核心难题。传统咨询方式要么依赖高价一对一顾问，要么只能查阅海量静态资料自行筛选，信息碎片化严重且缺乏个性化分析。同时，市面上的 AI 问答工具多为通用大模型，缺乏垂直领域的专业知识沉淀和结构化输出能力，难以提供靠谱的分数定位、院校推荐和志愿策略建议。",
     "techDetails": "全栈智能问答系统，后端基于 FastAPI + SQLModel + SQLite 构建 RESTful API 服务，前端采用 Next.js 15 + React + TypeScript + Tailwind CSS 构建现代化 SPA 界面。核心 AI 能力通过 OpenAI 兼容接口接入大语言模型，设计了可扩展的 Skill 路由架构：内置「张雪峰」高考咨询 Skill，支持关键词匹配 + 置信度阈值的多技能路由机制，以及基于本地 SKILL.md 的 Prompt Engineering 方案。系统实现了结构化 JSON 输出解析、多层规则兜底（模型异常/余额不足/非标返回均有降级策略）、智能分析权益控制（off/gated/on 三级模式）、学校/专业目录检索 Skill、微信公众号回调（签名校验 + AES 安全模式 + 多类型消息处理）、运营后台管理（内容管理/精选内容/榜单参考/媒体分析）等核心模块。配套完整的工程化体系：152 项 API 自动化测试 + 124 项前端测试、PowerShell 一键启动/停止/冒烟测试脚本、Linux systemd + Nginx 部署模板。",
     "outcome": "系统实现了从问答入口到结构化分析的完整闭环：用户通过 Web 端或微信公众号即可获得个性化的高考志愿分析报告，包含分数定位、院校推荐、专业建议、风险提示等结构化内容。张雪峰 Skill 可智能识别学校咨询、专业推荐、分数定位等不同意图，置信度不够时自动降级为规则兜底，确保聊天链路永不崩溃。系统已完成 152 项 API 测试 + 124 项前端测试全部通过，Next.js 生产构建零漏洞审计通过，具备从本地 MVP 到线上部署的完整交付能力。",
-    "github_url": ""
+    "github_url": "https://github.com/Caser-86/gaokao-agent"
   },
   {
     "id": 3,
