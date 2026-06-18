@@ -104,7 +104,6 @@
     "tech": "Unity 6 (6000.3.0f1) / C# / URP 17.3.0 / 2D Physics / ScriptableObject / NUnit / 程序化生成",
     "images": [
       "assets/project5.png",
-      "assets/project5_1.png",
       "assets/project5_2.png",
       "assets/project5_3.png",
       "assets/project5_4.png"
@@ -126,7 +125,8 @@
     "duration": "持续迭代",
     "tech": "Python 3.11 / CrewAI 1.14 / Streamlit 1.57 / DuckDuckGo / DeepSeek V4 / Pydantic v2 / Plotly / SQLite / pytest",
     "images": [
-      "assets/project6.png"
+      "assets/project6.png",
+      "assets/project6_1.png"
     ],
     "context": "企业做行业研究、竞品分析、热点追踪时，需要在多个信息源之间反复切换搜索、阅读、整理，耗时且容易遗漏关键情报。传统 AI 问答工具缺乏实时搜索能力，输出的行业分析往往基于过时的训练数据，无法反映最新市场动态。需要一个能自动搜索、自动分析、自动可视化的智能情报系统。",
     "techDetails": "基于 CrewAI 多智能体编排框架构建的实时情报分析系统。架构采用 Cache-first 工作流：用户输入关键词后先查 SQLite 缓存（支持 TTL），未命中则通过 DuckDuckGo 实时搜索获取最新来源，再由 CrewAI 编排 Analyst 和 Visualizer 两个 Agent 协同工作——Analyst 基于搜索结果生成结构化行业报告（InsightReport），Visualizer 将报告转化为图表结构（ChartSpec）。系统实现了三模式稳定性保障：live 模式走完整 CrewAI 管道，fallback 模式在 LLM/Agent 失败时自动降级为规则生成的保守报告，cache 模式直接返回 SQLite 缓存结果秒级响应。数据层使用 Pydantic v2 约束所有结构化输出（SourceItem、InsightReport、ChartSpec、RunMeta、RunEvent），搜索工具内置 URL 去重和坏链接跳过机制。前端使用 Streamlit 构建交互式看板，支持运行日志、Plotly 图表、Markdown 报告、来源链接、JSON/Markdown 下载。配套预热脚本和评估脚本用于演示就绪检查。",
