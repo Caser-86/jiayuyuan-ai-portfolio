@@ -1,0 +1,50 @@
+[
+    {
+        "id": 0,
+        "title": "Python 开发",
+        "icon": "terminal",
+        "description": "精通 Python 核心开发，熟悉 FastAPI, Flask 异步 Web 框架，掌握高并发后端架构设计。",
+        "proficiency": 95,
+        "order": 0
+    },
+    {
+        "id": 1,
+        "title": "大模型与 Agent 开发",
+        "icon": "brain-circuit",
+        "description": "深入理解 LangChain, LlamaIndex 与 AutoGen，擅长 Prompt 调优与复杂多智能体协作(Multi-Agent)开发。",
+        "proficiency": 90,
+        "order": 1
+    },
+    {
+        "id": 2,
+        "title": "自然语言处理 (NLP)",
+        "icon": "message-square-text",
+        "description": "熟悉向量检索 (RAG)、语义嵌入(Embedding)技术、命名实体识别和机器翻译系统构建。",
+        "proficiency": 88,
+        "order": 2
+    },
+    {
+        "id": 3,
+        "title": "API 与工作流集成",
+        "icon": "git-branch",
+        "description": "熟练使用 n8n, Flowise 等图形化流编排工具，打通飞书、微信、Salesforce 等第三方企业级系统 API。",
+        "proficiency": 92,
+        "order": 3
+    },
+    {
+        "id": 4,
+        "title": "数据分析与可视化",
+        "icon": "bar-chart-3",
+        "description": "掌握 Pandas, NumPy 数据处理，熟悉 D3.js, ECharts 可视化图表，提供 AI 驱动的商业智能数据洞察。",
+        "proficiency": 85,
+        "order": 4
+    },
+    {
+        "id": 5,
+        "title": "云平台部署与运维",
+        "icon": "cloud",
+        "description": "熟悉 Docker 容器化技术，具备 AWS、阿里云及 Vercel、HuggingFace Spaces 等云平台的快速部署和扩容经验。",
+        "proficiency": 80,
+        "order": 5
+    }
+]

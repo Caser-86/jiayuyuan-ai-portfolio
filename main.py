@@ -138,6 +138,18 @@ def verify_admin(x_admin_password: Optional[str] = Header(None)):
 # ==========================================
 # 数据模型定义 (Request Schema)
 # ==========================================
+class ProjectCreateSchema(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    tags: List[str] = Field(default=[], max_length=20)
+    client: str = Field(default="", max_length=100)
+    duration: str = Field(default="", max_length=50)
+    tech: str = Field(default="", max_length=500)
+    context: str = Field(default="", max_length=2000)
+    techDetails: str = Field(default="", max_length=3000)
+    outcome: str = Field(default="", max_length=2000)
+    github_url: str = Field(default="", max_length=500)
+
+
 class ProjectUpdateSchema(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     tags: List[str] = Field(..., min_length=1, max_length=20)
@@ -147,6 +159,7 @@ class ProjectUpdateSchema(BaseModel):
     context: str = Field(..., max_length=2000)
     techDetails: str = Field(..., max_length=3000)
     outcome: str = Field(..., max_length=2000)
+    github_url: str = Field(default="", max_length=500)
 
 
 class MessageCreateSchema(BaseModel):
@@ -174,6 +187,13 @@ def get_home_page():
     if os.path.exists(html_path):
         return FileResponse(html_path)
     raise HTTPException(status_code=404, detail="未找到 index.html 文件")
+
+
+@app.get("/admin.html")
+def redirect_admin_html():
+    """将 /admin.html 重定向到 /admin"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/admin", status_code=301)
 
 
 @app.get("/admin", response_class=FileResponse)
@@ -219,8 +239,34 @@ def admin_login(payload: dict, request: Request):
 # ==========================================
 @app.get("/api/projects")
 def get_projects():
-    """获取所有 6 个项目的数据"""
+    """获取所有项目的数据"""
     return read_json_file(PROJECTS_FILE, [])
+
+
+@app.post("/api/projects")
+def create_project(project_data: ProjectCreateSchema, authenticated: bool = Depends(verify_admin)):
+    """创建新项目（需要管理员密码鉴权）"""
+    with _file_lock:
+        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+        new_id = len(projects)
+        new_project = {
+            "id": new_id,
+            "title": project_data.title,
+            "tags": project_data.tags,
+            "client": project_data.client,
+            "duration": project_data.duration,
+            "tech": project_data.tech,
+            "img": f"assets/project{new_id + 1}.png",
+            "images": [f"assets/project{new_id + 1}.png"],
+            "context": project_data.context,
+            "techDetails": project_data.techDetails,
+            "outcome": project_data.outcome,
+            "github_url": project_data.github_url
+        }
+        projects.append(new_project)
+        _write_json_unlocked(PROJECTS_FILE, projects)
+
+    return {"success": True, "message": f"项目已成功创建", "id": new_id}
 
 
 @app.post("/api/projects/{project_id}")
@@ -252,13 +298,55 @@ def update_project(project_id: int, project_data: ProjectUpdateSchema, authentic
             "images": projects[target_index].get("images", [f"assets/project{project_id + 1}.png"]),
             "context": project_data.context,
             "techDetails": project_data.techDetails,
-            "outcome": project_data.outcome
+            "outcome": project_data.outcome,
+            "github_url": project_data.github_url
         }
         
         projects[target_index] = updated_project
         _write_json_unlocked(PROJECTS_FILE, projects)
     
     return {"success": True, "message": f"项目 ID {project_id} 信息已成功更新"}
+
+
+@app.delete("/api/projects/{project_id}")
+def delete_project(project_id: int, authenticated: bool = Depends(verify_admin)):
+    """删除某个项目（需要管理员密码鉴权）"""
+    with _file_lock:
+        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+        original_len = len(projects)
+        projects = [p for p in projects if p.get("id") != project_id]
+        if len(projects) == original_len:
+            raise HTTPException(status_code=404, detail=f"未找到 ID 为 {project_id} 的项目")
+        # 重新分配 ID，保持连续
+        for i, p in enumerate(projects):
+            p["id"] = i
+        _write_json_unlocked(PROJECTS_FILE, projects)
+
+    return {"success": True, "message": f"项目 ID {project_id} 已成功删除"}
+
+
+class ReorderRequest(BaseModel):
+    """项目排序请求体"""
+    order: list[int]  # 项目 ID 的新顺序
+
+
+@app.post("/api/projects/reorder")
+def reorder_projects(req: ReorderRequest, authenticated: bool = Depends(verify_admin)):
+    """按指定顺序重新排列项目（需要管理员密码鉴权）"""
+    with _file_lock:
+        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+        project_map = {p["id"]: p for p in projects}
+        # 按新顺序重组
+        new_projects = []
+        for new_idx, pid in enumerate(req.order):
+            if pid not in project_map:
+                raise HTTPException(status_code=400, detail=f"项目 ID {pid} 不存在")
+            proj = project_map[pid]
+            proj["id"] = new_idx
+            new_projects.append(proj)
+        _write_json_unlocked(PROJECTS_FILE, new_projects)
+
+    return {"success": True, "message": "项目顺序已成功更新"}
 
 
 # ==========================================
@@ -337,6 +425,14 @@ async def upload_image(
                 _write_json_unlocked(PROJECTS_FILE, projects)
         else:
             filename = f"{base_type}.png"
+            # 上传主图时也更新 projects.json 的 images 数组
+            proj_idx = int(base_type.replace("project", ""))
+            with _file_lock:
+                projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+                proj = next((p for p in projects if p["id"] == proj_idx - 1), None)
+                if proj:
+                    proj["images"] = [f"assets/{filename}"]
+                    _write_json_unlocked(PROJECTS_FILE, projects)
     else:
         raise HTTPException(status_code=400, detail="未知的图片类型分类，无法保存")
 
@@ -403,7 +499,308 @@ async def delete_project_image(
 
 
 # ==========================================
-# 5. 留言 API 路由 (Messages Management)
+# 6. 视频作品 API 路由 (Video Works)
+# ==========================================
+# 视频作品数据文件
+VIDEO_WORKS_FILE = os.path.join(DATA_DIR, "video_works.json")
+
+# 视频上传大小限制：100MB
+MAX_VIDEO_SIZE = 100 * 1024 * 1024
+ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".webm", ".mov"}
+
+
+class VideoWorkSchema(BaseModel):
+    """视频作品数据模型"""
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(default="", max_length=2000)
+    tech_stack: str = Field(default="", max_length=500)
+    video_url: str = Field(default="", max_length=500)
+    thumbnail_url: str = Field(default="", max_length=500)
+    tags: List[str] = Field(default=[], max_length=20)
+
+
+@app.get("/api/video-works")
+def get_video_works():
+    """获取所有视频作品"""
+    return read_json_file(VIDEO_WORKS_FILE, [])
+
+
+@app.post("/api/video-works")
+def create_video_work(work: VideoWorkSchema, authenticated: bool = Depends(verify_admin)):
+    """创建新视频作品"""
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        new_id = len(works)
+        new_work = {
+            "id": new_id,
+            "title": work.title,
+            "description": work.description,
+            "tech_stack": work.tech_stack,
+            "video_url": work.video_url,
+            "thumbnail_url": work.thumbnail_url,
+            "tags": work.tags
+        }
+        works.append(new_work)
+        _write_json_unlocked(VIDEO_WORKS_FILE, works)
+    return {"success": True, "message": "视频作品创建成功", "id": new_id}
+
+
+@app.post("/api/video-works/{work_id}")
+def update_video_work(work_id: int, work: VideoWorkSchema, authenticated: bool = Depends(verify_admin)):
+    """更新视频作品"""
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        target_index = -1
+        for i, w in enumerate(works):
+            if w.get("id") == work_id:
+                target_index = i
+                break
+        if target_index == -1:
+            raise HTTPException(status_code=404, detail="未找到该视频作品")
+        
+        works[target_index] = {
+            "id": work_id,
+            "title": work.title,
+            "description": work.description,
+            "tech_stack": work.tech_stack,
+            "video_url": works[target_index].get("video_url", ""),
+            "thumbnail_url": works[target_index].get("thumbnail_url", ""),
+            "tags": work.tags
+        }
+        _write_json_unlocked(VIDEO_WORKS_FILE, works)
+    return {"success": True, "message": "视频作品更新成功"}
+
+
+@app.delete("/api/video-works/{work_id}")
+def delete_video_work(work_id: int, authenticated: bool = Depends(verify_admin)):
+    """删除视频作品（同时清理关联的视频和封面文件）"""
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        target = next((w for w in works if w.get("id") == work_id), None)
+        if target:
+            # 删除关联的视频和封面文件
+            for url_key in ("video_url", "thumbnail_url"):
+                url = target.get(url_key, "")
+                if url:
+                    safe_name = os.path.basename(url)
+                    fpath = os.path.join(ASSETS_DIR, safe_name)
+                    if os.path.exists(fpath) and os.path.realpath(fpath).startswith(os.path.realpath(ASSETS_DIR)):
+                        os.remove(fpath)
+        works = [w for w in works if w.get("id") != work_id]
+        for i, w in enumerate(works):
+            w["id"] = i
+        _write_json_unlocked(VIDEO_WORKS_FILE, works)
+    return {"success": True, "message": "视频作品已删除"}
+
+
+@app.post("/api/video-works/{work_id}/upload-video")
+async def upload_video(
+    work_id: int,
+    file: UploadFile = File(...),
+    authenticated: bool = Depends(verify_admin)
+):
+    """上传视频文件"""
+    # 先验证作品是否存在
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        work = next((w for w in works if w["id"] == work_id), None)
+    if not work:
+        raise HTTPException(status_code=404, detail="未找到该视频作品")
+
+    # 文件大小校验
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    if file_size > MAX_VIDEO_SIZE:
+        raise HTTPException(status_code=400, detail=f"文件过大，最大允许 {MAX_VIDEO_SIZE // 1024 // 1024}MB")
+
+    # 文件扩展名校验
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in ALLOWED_VIDEO_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"不支持的视频格式，仅允许：{', '.join(sorted(ALLOWED_VIDEO_EXTENSIONS))}")
+
+    # 删除旧视频文件
+    old_url = work.get("video_url", "")
+    if old_url:
+        old_name = os.path.basename(old_url)
+        old_path = os.path.join(ASSETS_DIR, old_name)
+        if os.path.exists(old_path) and os.path.realpath(old_path).startswith(os.path.realpath(ASSETS_DIR)):
+            os.remove(old_path)
+
+    filename = f"video_{work_id}{ext}"
+    target_path = os.path.join(ASSETS_DIR, filename)
+
+    try:
+        with open(target_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        with _file_lock:
+            works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+            w = next((w for w in works if w["id"] == work_id), None)
+            if w:
+                w["video_url"] = f"assets/{filename}"
+                _write_json_unlocked(VIDEO_WORKS_FILE, works)
+
+        return {"success": True, "message": "视频上传成功", "filename": filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="视频上传失败")
+
+
+@app.post("/api/video-works/{work_id}/upload-thumbnail")
+async def upload_thumbnail(
+    work_id: int,
+    file: UploadFile = File(...),
+    authenticated: bool = Depends(verify_admin)
+):
+    """上传视频封面图"""
+    # 先验证作品是否存在
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        work = next((w for w in works if w["id"] == work_id), None)
+    if not work:
+        raise HTTPException(status_code=404, detail="未找到该视频作品")
+
+    # 文件大小校验
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    if file_size > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail=f"文件过大，最大允许 {MAX_UPLOAD_SIZE // 1024 // 1024}MB")
+
+    # 文件扩展名校验
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"不支持的图片格式，仅允许：{', '.join(sorted(ALLOWED_EXTENSIONS))}")
+
+    # 删除旧封面文件
+    old_url = work.get("thumbnail_url", "")
+    if old_url:
+        old_name = os.path.basename(old_url)
+        old_path = os.path.join(ASSETS_DIR, old_name)
+        if os.path.exists(old_path) and os.path.realpath(old_path).startswith(os.path.realpath(ASSETS_DIR)):
+            os.remove(old_path)
+
+    filename = f"video_{work_id}_thumb{ext}"
+    target_path = os.path.join(ASSETS_DIR, filename)
+
+    try:
+        with open(target_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        with _file_lock:
+            works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+            w = next((w for w in works if w["id"] == work_id), None)
+            if w:
+                w["thumbnail_url"] = f"assets/{filename}"
+                _write_json_unlocked(VIDEO_WORKS_FILE, works)
+
+        return {"success": True, "message": "封面上传成功", "filename": filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="封面上传失败")
+
+
+# ==========================================
+# 6.5 技能管理 API 路由 (Skills Management)
+# ==========================================
+SKILLS_FILE = os.path.join(DATA_DIR, "skills.json")
+
+
+class SkillSchema(BaseModel):
+    """技能数据模型"""
+    title: str = Field(..., min_length=1, max_length=100)
+    icon: str = Field(default="code", max_length=50)
+    description: str = Field(default="", max_length=500)
+    proficiency: int = Field(default=80, ge=0, le=100)
+
+
+@app.get("/api/skills")
+def get_skills():
+    """获取所有技能"""
+    return read_json_file(SKILLS_FILE, [])
+
+
+@app.post("/api/skills")
+def create_skill(skill: SkillSchema, authenticated: bool = Depends(verify_admin)):
+    """创建新技能"""
+    with _file_lock:
+        skills = read_json_file(SKILLS_FILE, [], _locked=True)
+        new_id = len(skills)
+        new_skill = {
+            "id": new_id,
+            "title": skill.title,
+            "icon": skill.icon,
+            "description": skill.description,
+            "proficiency": skill.proficiency,
+            "order": new_id
+        }
+        skills.append(new_skill)
+        _write_json_unlocked(SKILLS_FILE, skills)
+    return {"success": True, "message": "技能创建成功", "id": new_id}
+
+
+@app.post("/api/skills/reorder")
+def reorder_skills(order: List[int], authenticated: bool = Depends(verify_admin)):
+    """重排技能顺序"""
+    with _file_lock:
+        skills = read_json_file(SKILLS_FILE, [], _locked=True)
+        existing_ids = {s.get("id") for s in skills}
+        order_ids = set(order)
+        # 校验：排序列表必须包含所有现有技能，不能丢弃也不能凭空添加
+        if existing_ids != order_ids:
+            raise HTTPException(status_code=400, detail="排序列表必须包含所有技能的 ID，不能多也不能少")
+        reordered = []
+        for skill_id in order:
+            for s in skills:
+                if s.get("id") == skill_id:
+                    reordered.append(s)
+                    break
+        for i, s in enumerate(reordered):
+            s["id"] = i
+            s["order"] = i
+        _write_json_unlocked(SKILLS_FILE, reordered)
+    return {"success": True, "message": "技能排序已更新"}
+
+
+@app.post("/api/skills/{skill_id}")
+def update_skill(skill_id: int, skill: SkillSchema, authenticated: bool = Depends(verify_admin)):
+    """更新技能"""
+    with _file_lock:
+        skills = read_json_file(SKILLS_FILE, [], _locked=True)
+        target_index = -1
+        for i, s in enumerate(skills):
+            if s.get("id") == skill_id:
+                target_index = i
+                break
+        if target_index == -1:
+            raise HTTPException(status_code=404, detail="未找到该技能")
+
+        skills[target_index] = {
+            "id": skill_id,
+            "title": skill.title,
+            "icon": skill.icon,
+            "description": skill.description,
+            "proficiency": skill.proficiency,
+            "order": skills[target_index].get("order", target_index)
+        }
+        _write_json_unlocked(SKILLS_FILE, skills)
+    return {"success": True, "message": "技能更新成功"}
+
+
+@app.delete("/api/skills/{skill_id}")
+def delete_skill(skill_id: int, authenticated: bool = Depends(verify_admin)):
+    """删除技能"""
+    with _file_lock:
+        skills = read_json_file(SKILLS_FILE, [], _locked=True)
+        skills = [s for s in skills if s.get("id") != skill_id]
+        for i, s in enumerate(skills):
+            s["id"] = i
+            s["order"] = i
+        _write_json_unlocked(SKILLS_FILE, skills)
+    return {"success": True, "message": "技能已删除"}
+
+
+# ==========================================
+# 7. 留言 API 路由 (Messages Management)
 # ==========================================
 # 留言限流：每 IP 每小时最多 5 条
 _message_rate_limit_store: Dict[str, list] = defaultdict(list)
@@ -582,7 +979,7 @@ def update_profile(
 @app.get("/health")
 def health_check():
     """健康检查接口（监控用）"""
-    return {"status": "ok", "version": "0.1.3"}
+    return {"status": "ok", "version": "2.0.0"}
 
 
 @app.get("/robots.txt")

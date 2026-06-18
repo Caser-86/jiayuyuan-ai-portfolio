@@ -754,6 +754,12 @@
             <button class="menu-item active" onclick="switchPanel('projects', this)">
                 <i data-lucide="layout-grid"></i> 修改项目列表
             </button>
+            <button class="menu-item" onclick="switchPanel('video-works', this)">
+                <i data-lucide="video"></i> 视频作品管理
+            </button>
+            <button class="menu-item" onclick="switchPanel('skills', this)">
+                <i data-lucide="award"></i> 技能设置
+            </button>
             <button class="menu-item" onclick="switchPanel('images', this)">
                 <i data-lucide="image"></i> 上传个人照片
             </button>
@@ -772,16 +778,53 @@
         <section class="main-content">
             <!-- 面板 1：修改项目 -->
             <div class="content-panel active" id="panel-projects">
-                <div class="panel-header">
-                    <h2>项目列表修改</h2>
-                    <p>管理个人网站上展示的 6 个精选项目信息。</p>
+                <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h2>项目列表修改</h2>
+                        <p>管理个人网站上展示的精选项目信息，支持新增、编辑、排序和删除。</p>
+                    </div>
+                    <button class="btn" style="background:var(--primary);color:#fff;white-space:nowrap;" onclick="openCreateModal()">
+                        <i data-lucide="plus" style="width:16px;height:16px;"></i> 新建项目
+                    </button>
                 </div>
                 <div class="projects-list-grid" id="projects-container">
                     <!-- 项目卡片由 JS 动态渲染 -->
                 </div>
             </div>
 
-            <!-- 面板 2：上传照片 -->
+            <!-- 面板 2：视频作品管理 -->
+            <div class="content-panel" id="panel-video-works">
+                <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h2>视频作品管理</h2>
+                        <p>上传和管理个人视频作品，支持视频上传、封面设置和详细信息编辑。</p>
+                    </div>
+                    <button class="btn" style="background:var(--primary);color:#fff;white-space:nowrap;" onclick="openCreateVideoWorkModal()">
+                        <i data-lucide="plus" style="width:16px;height:16px;"></i> 新建视频作品
+                    </button>
+                </div>
+                <div class="projects-list-grid" id="video-works-container">
+                    <!-- 视频作品卡片由 JS 动态渲染 -->
+                </div>
+            </div>
+
+            <!-- 面板 3：技能设置 -->
+            <div class="content-panel" id="panel-skills">
+                <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h2>技能设置</h2>
+                        <p>管理"专业技能"区域展示的技能卡片，支持增删改和拖拽排序。</p>
+                    </div>
+                    <button class="btn" style="background:var(--primary);color:#fff;white-space:nowrap;" onclick="openCreateSkillModal()">
+                        <i data-lucide="plus" style="width:16px;height:16px;"></i> 新增技能
+                    </button>
+                </div>
+                <div class="projects-list-grid" id="skills-container">
+                    <!-- 技能卡片由 JS 动态渲染 -->
+                </div>
+            </div>
+
+            <!-- 面板 4：上传照片 -->
             <div class="content-panel" id="panel-images">
                 <div class="panel-header">
                     <h2>系统照片上传</h2>
@@ -908,25 +951,31 @@
                             <input type="text" id="edit-title" class="form-input" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit-tags" class="form-label">技术栈标签 (逗号分隔) *</label>
-                            <input type="text" id="edit-tags" class="form-input" placeholder="例如: LangChain, FastAPI" required>
+                            <label for="edit-github-url" class="form-label">GitHub 仓库地址</label>
+                            <input type="url" id="edit-github-url" class="form-input" placeholder="https://github.com/username/repo">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="edit-tags" class="form-label">技术栈标签 (逗号分隔) *</label>
+                            <input type="text" id="edit-tags" class="form-input" placeholder="例如: LangChain, FastAPI" required>
+                        </div>
+                        <div class="form-group">
                             <label for="edit-client" class="form-label">客户类型 *</label>
                             <input type="text" id="edit-client" class="form-input" required>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="edit-duration" class="form-label">交付周期 *</label>
                             <input type="text" id="edit-duration" class="form-input" required>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit-tech" class="form-label">核心开发技术链 *</label>
-                        <input type="text" id="edit-tech" class="form-input" required>
+                        <div class="form-group">
+                            <label for="edit-tech" class="form-label">核心开发技术链 *</label>
+                            <input type="text" id="edit-tech" class="form-input" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -949,6 +998,171 @@
                         <button type="submit" class="btn btn-primary">保存修改</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建项目弹窗 -->
+    <div class="modal" id="create-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新建项目</h3>
+                <button class="modal-close" onclick="closeCreateModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form class="edit-form" id="project-create-form" onsubmit="submitProjectCreate(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="create-title" class="form-label">项目名称 *</label>
+                            <input type="text" id="create-title" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="create-github-url" class="form-label">GitHub 仓库地址</label>
+                            <input type="url" id="create-github-url" class="form-input" placeholder="https://github.com/username/repo">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="create-tags" class="form-label">技术栈标签 (逗号分隔)</label>
+                            <input type="text" id="create-tags" class="form-input" placeholder="例如: LangChain, FastAPI">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-client" class="form-label">客户类型</label>
+                            <input type="text" id="create-client" class="form-input" placeholder="例如: 自主孵化">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="create-duration" class="form-label">交付周期</label>
+                            <input type="text" id="create-duration" class="form-input" placeholder="例如: 3 周">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-tech" class="form-label">核心开发技术链</label>
+                            <input type="text" id="create-tech" class="form-input" placeholder="例如: Python / FastAPI">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-context" class="form-label">项目背景与痛点</label>
+                        <textarea id="create-context" class="form-textarea"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-tech-details" class="form-label">技术实现路径</label>
+                        <textarea id="create-tech-details" class="form-textarea"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-outcome" class="form-label">项目成果与商业价值</label>
+                        <textarea id="create-outcome" class="form-textarea"></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                        <button type="button" class="btn" onclick="closeCreateModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
+                        <button type="submit" class="btn btn-primary">创建项目</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视频作品编辑弹窗 -->
+    <div class="modal" id="video-work-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="video-work-modal-title">编辑视频作品</h3>
+                <button class="modal-close" onclick="closeVideoWorkModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form class="edit-form" id="video-work-form" onsubmit="submitVideoWork(event)">
+                    <input type="hidden" id="vw-id">
+                    <div class="form-group">
+                        <label for="vw-title" class="form-label">作品标题 *</label>
+                        <input type="text" id="vw-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vw-tags" class="form-label">标签 (逗号分隔)</label>
+                        <input type="text" id="vw-tags" class="form-input" placeholder="例如: 动画, 特效, 教程">
+                    </div>
+                    <div class="form-group">
+                        <label for="vw-description" class="form-label">作品简介</label>
+                        <textarea id="vw-description" class="form-textarea" placeholder="描述视频内容、创意理念等"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="vw-tech" class="form-label">使用技术/软件/插件</label>
+                        <input type="text" id="vw-tech" class="form-input" placeholder="例如: After Effects, Blender, DaVinci Resolve">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">视频文件</label>
+                        <div id="vw-video-status" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;">尚未上传视频</div>
+                        <button type="button" class="btn" onclick="document.getElementById('vw-video-file').click()" style="background:#ede9fe;color:#7c3aed;">
+                            <i data-lucide="video"></i> <span id="vw-video-btn-text">上传视频</span>
+                        </button>
+                        <input type="file" id="vw-video-file" class="hidden-file-input" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" onchange="uploadVideoWorkVideo(this)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">封面图片</label>
+                        <div id="vw-thumb-status" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;">尚未上传封面</div>
+                        <button type="button" class="btn" onclick="document.getElementById('vw-thumb-file').click()" style="background:#f0fdf4;color:#16a34a;">
+                            <i data-lucide="image"></i> <span id="vw-thumb-btn-text">上传封面</span>
+                        </button>
+                        <input type="file" id="vw-thumb-file" class="hidden-file-input" accept="image/*" onchange="uploadVideoWorkThumbnail(this)">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                        <button type="button" class="btn" onclick="closeVideoWorkModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 技能编辑弹窗 -->
+    <div class="modal" id="skill-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="skill-modal-title">编辑技能</h3>
+                <button class="modal-close" onclick="closeSkillModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form class="edit-form" id="skill-form" onsubmit="submitSkill(event)">
+                    <input type="hidden" id="skill-id">
+                    <div class="form-group">
+                        <label for="skill-title" class="form-label">技能名称 *</label>
+                        <input type="text" id="skill-title" class="form-input" required placeholder="例如: Python 开发">
+                    </div>
+                    <div class="form-group">
+                        <label for="skill-icon" class="form-label">图标 (Lucide 图标名)</label>
+                        <input type="text" id="skill-icon" class="form-input" placeholder="例如: terminal, brain-circuit, code, database">
+                    </div>
+                    <div class="form-group">
+                        <label for="skill-desc" class="form-label">技能描述</label>
+                        <textarea id="skill-desc" class="form-textarea" placeholder="描述该技能的能力和经验"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="skill-proficiency" class="form-label">熟练度 (0-100)</label>
+                        <input type="number" id="skill-proficiency" class="form-input" min="0" max="100" value="80">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                        <button type="button" class="btn" onclick="closeSkillModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片预览弹窗 -->
+    <div class="modal" id="image-preview-modal" style="z-index:10001;">
+        <div class="modal-content" style="max-width:90vw;max-height:90vh;background:transparent;box-shadow:none;padding:0;">
+            <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;">
+                <button onclick="closeImagePreview()" style="position:absolute;top:-40px;right:0;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;">&times;</button>
+                <button id="img-prev-btn" onclick="previewPrevImage()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;">&#8249;</button>
+                <img id="preview-image" src="" alt="预览" style="max-width:85vw;max-height:75vh;object-fit:contain;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+                <button id="img-next-btn" onclick="previewNextImage()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;">&#8250;</button>
+                <div id="preview-counter" style="color:#fff;margin-top:16px;font-size:0.9rem;background:rgba(0,0,0,0.5);padding:6px 16px;border-radius:20px;"></div>
             </div>
         </div>
     </div>
@@ -1127,7 +1341,7 @@
                     // 用 data 属性 + 事件委托避免 onclick 字符串转义问题
                     return `
                         <div style="position:relative;display:inline-block;margin:2px;">
-                            <img src="${escapeAttr(src)}?t=${ts}" style="width:80px;height:60px;object-fit:contain;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;">
+                            <img src="${escapeAttr(src)}?t=${ts}" data-preview-src="${escapeAttr(src)}" data-preview-idx="${i}" class="img-thumbnail-preview" style="width:80px;height:60px;object-fit:contain;background:#f8fafc;border-radius:6px;border:1px solid #e2e8f0;cursor:pointer;">
                             ${!isMain ? `<button class="btn-delete-img" data-project-id="${proj.id}" data-filename="${escapeAttr(fname)}" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#ef4444;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:10px;line-height:18px;text-align:center;padding:0;">&times;</button>` : ''}
                         </div>`;
                 }).join('');
@@ -1164,8 +1378,62 @@
                 });
             });
 
+            // 缩略图点击预览
+            container.querySelectorAll('.img-thumbnail-preview').forEach(img => {
+                img.addEventListener('click', () => {
+                    const src = img.dataset.previewSrc;
+                    const idx = parseInt(img.dataset.previewIdx);
+                    openImagePreview(images, idx);
+                });
+            });
+
             lucide.createIcons();
         }
+
+        // 图片预览功能
+        let previewImages = [];
+        let previewIndex = 0;
+
+        function openImagePreview(images, index) {
+            previewImages = images;
+            previewIndex = index;
+            updatePreviewImage();
+            document.getElementById('image-preview-modal').classList.add('active');
+        }
+
+        function closeImagePreview() {
+            document.getElementById('image-preview-modal').classList.remove('active');
+        }
+
+        function previewPrevImage() {
+            if (previewImages.length === 0) return;
+            previewIndex = (previewIndex - 1 + previewImages.length) % previewImages.length;
+            updatePreviewImage();
+        }
+
+        function previewNextImage() {
+            if (previewImages.length === 0) return;
+            previewIndex = (previewIndex + 1) % previewImages.length;
+            updatePreviewImage();
+        }
+
+        function updatePreviewImage() {
+            const img = document.getElementById('preview-image');
+            const counter = document.getElementById('preview-counter');
+            if (previewImages.length > 0 && previewIndex >= 0 && previewIndex < previewImages.length) {
+                img.src = previewImages[previewIndex] + '?t=' + Date.now();
+                counter.textContent = `${previewIndex + 1} / ${previewImages.length}`;
+            }
+        }
+
+        // 键盘快捷键：ESC 关闭，左右箭头切换
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('image-preview-modal');
+            if (!modal.classList.contains('active')) return;
+            if (e.key === 'Escape') closeImagePreview();
+            if (e.key === 'ArrowLeft') previewPrevImage();
+            if (e.key === 'ArrowRight') previewNextImage();
+        });
 
         // 删除项目额外图片
         async function deleteProjectImage(projectId, filename) {
@@ -1199,6 +1467,7 @@
             projects.forEach((proj, idx) => {
                 const card = document.createElement('div');
                 card.className = 'project-edit-card';
+                card.dataset.projectId = proj.id;
                 card.innerHTML = `
                     <div class="project-card-header">
                         <h3>${escapeHtml(proj.title)}</h3>
@@ -1209,14 +1478,100 @@
                         <strong>技术栈:</strong> ${escapeHtml(proj.tags.join(', '))}
                     </div>
                     <div class="project-card-footer">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <button class="btn" style="padding:6px 10px;font-size:0.85rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, -1)" title="上移" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <i data-lucide="chevron-up" style="width:14px;height:14px;"></i>
+                            </button>
+                            <button class="btn" style="padding:6px 10px;font-size:0.85rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, 1)" title="下移" ${idx === projects.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+                            </button>
+                        </div>
                         <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openEditModal(${proj.id})">
                             <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> 编辑信息
+                        </button>
+                        <button class="btn" style="padding:6px 14px;font-size:0.85rem;background:#fef2f2;color:#dc2626;" onclick="confirmDeleteProject(${proj.id}, '${escapeAttr(proj.title)}')">
+                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> 删除
                         </button>
                     </div>
                 `;
                 container.appendChild(card);
             });
             lucide.createIcons();
+        }
+
+        // 上移/下移项目
+        async function moveProject(projectId, direction) {
+            const idx = loadedProjects.findIndex(p => p.id === projectId);
+            if (idx === -1) return;
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= loadedProjects.length) return;
+
+            // 交换位置
+            [loadedProjects[idx], loadedProjects[newIdx]] = [loadedProjects[newIdx], loadedProjects[idx]];
+            const order = loadedProjects.map(p => p.id);
+
+            try {
+                const res = await fetch('/api/projects/reorder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Password': sessionStorage.getItem('admin_password') || ''
+                    },
+                    body: JSON.stringify({ order })
+                });
+                if (res.status === 401) {
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    // 更新本地 ID
+                    loadedProjects.forEach((p, i) => p.id = i);
+                    renderProjects(loadedProjects);
+                    renderProjectImageCards(loadedProjects);
+                    showToast('项目顺序已更新', 'success');
+                } else {
+                    showToast(data.message || '排序失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络错误，排序失败', 'error');
+            }
+        }
+
+        // 确认删除项目
+        function confirmDeleteProject(projectId, title) {
+            if (confirm(`确定要删除项目「${title}」吗？\n此操作不可撤销。`)) {
+                deleteProject(projectId);
+            }
+        }
+
+        // 删除项目
+        async function deleteProject(projectId) {
+            try {
+                const res = await fetch(`/api/projects/${projectId}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Password': sessionStorage.getItem('admin_password') || '' }
+                });
+                if (res.status === 401) {
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    loadedProjects = loadedProjects.filter(p => p.id !== projectId);
+                    // 重新分配本地 ID
+                    loadedProjects.forEach((p, i) => p.id = i);
+                    renderProjects(loadedProjects);
+                    renderProjectImageCards(loadedProjects);
+                    showToast('项目已删除', 'success');
+                } else {
+                    showToast(data.message || '删除失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络错误，删除失败', 'error');
+            }
         }
 
         // 获取并渲染客户留言列表
@@ -1299,6 +1654,7 @@
             document.getElementById('edit-context').value = proj.context;
             document.getElementById('edit-tech-details').value = proj.techDetails;
             document.getElementById('edit-outcome').value = proj.outcome;
+            document.getElementById('edit-github-url').value = proj.github_url || '';
 
             editModal.classList.add('active');
         }
@@ -1319,7 +1675,8 @@
                 tech: document.getElementById('edit-tech').value,
                 context: document.getElementById('edit-context').value,
                 techDetails: document.getElementById('edit-tech-details').value,
-                outcome: document.getElementById('edit-outcome').value
+                outcome: document.getElementById('edit-outcome').value,
+                github_url: document.getElementById('edit-github-url').value.trim()
             };
 
             try {
@@ -1346,6 +1703,62 @@
                 }
             } catch (err) {
                 showToast('网络请求异常，保存失败', 'error');
+            }
+        }
+
+        // ==========================================
+        // 4.5 新建项目
+        // ==========================================
+        const createModal = document.getElementById('create-modal');
+
+        function openCreateModal() {
+            document.getElementById('project-create-form').reset();
+            createModal.classList.add('active');
+        }
+
+        function closeCreateModal() {
+            createModal.classList.remove('active');
+        }
+
+        async function submitProjectCreate(event) {
+            event.preventDefault();
+
+            const payload = {
+                title: document.getElementById('create-title').value,
+                tags: document.getElementById('create-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
+                client: document.getElementById('create-client').value,
+                duration: document.getElementById('create-duration').value,
+                tech: document.getElementById('create-tech').value,
+                context: document.getElementById('create-context').value,
+                techDetails: document.getElementById('create-tech-details').value,
+                outcome: document.getElementById('create-outcome').value,
+                github_url: document.getElementById('create-github-url').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    closeCreateModal();
+                    showToast('项目创建成功！', 'success');
+                    fetchProjects();
+                } else {
+                    showToast('创建失败，请重试', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，创建失败', 'error');
             }
         }
 
@@ -1515,7 +1928,453 @@
         }
 
         // ==========================================
-        // 6. UI 控制辅助函数
+        // 6. 视频作品管理
+        // ==========================================
+        let videoWorks = [];
+        const videoWorkModal = document.getElementById('video-work-modal');
+
+        async function fetchVideoWorks() {
+            try {
+                const res = await fetch('/api/video-works');
+                videoWorks = await res.json();
+                renderVideoWorks();
+            } catch (err) {
+                console.error('获取视频作品失败:', err);
+            }
+        }
+
+        function renderVideoWorks() {
+            const container = document.getElementById('video-works-container');
+            container.innerHTML = '';
+
+            if (videoWorks.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);"><i data-lucide="video-off" style="width:48px;height:48px;margin-bottom:16px;opacity:0.3;"></i><p>暂无视频作品，点击右上角"新建视频作品"开始添加。</p></div>';
+                lucide.createIcons();
+                return;
+            }
+
+            videoWorks.forEach(work => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.style.cssText = 'position:relative;';
+
+                // 封面预览
+                const thumbHtml = work.thumbnail_url
+                    ? `<img src="${work.thumbnail_url}" alt="${escapeAttr(work.title)}" style="width:100%;height:180px;object-fit:cover;border-radius:8px 8px 0 0;">`
+                    : `<div style="width:100%;height:180px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;"><i data-lucide="video" style="width:48px;height:48px;color:rgba(255,255,255,0.5);"></i></div>`;
+
+                // 标签
+                const tagsHtml = (work.tags || []).map(t => `<span style="display:inline-block;padding:2px 10px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:0.75rem;margin-right:4px;">${escapeHtml(t)}</span>`).join('');
+
+                card.innerHTML = `
+                    ${thumbHtml}
+                    <div style="padding:16px;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                            <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(work.title)}</h3>
+                            <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;margin-left:8px;">视频 ${work.id + 1}</span>
+                        </div>
+                        ${tagsHtml ? `<div style="margin-bottom:8px;">${tagsHtml}</div>` : ''}
+                        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:8px;line-height:1.5;">${escapeHtml(work.description || '暂无简介')}</p>
+                        ${work.tech_stack ? `<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;"><strong>技术:</strong> ${escapeHtml(work.tech_stack)}</p>` : ''}
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button class="btn" onclick="openEditVideoWorkModal(${work.id})" style="background:var(--primary);color:#fff;font-size:0.85rem;padding:8px 16px;">
+                                <i data-lucide="edit-3"></i> 编辑
+                            </button>
+                            <button class="btn" onclick="deleteVideoWork(${work.id})" style="background-color:#fee2e2;color:#dc2626;font-size:0.85rem;padding:8px 16px;">
+                                <i data-lucide="trash-2"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openCreateVideoWorkModal() {
+            document.getElementById('video-work-modal-title').innerText = '新建视频作品';
+            document.getElementById('vw-id').value = '';
+            document.getElementById('vw-title').value = '';
+            document.getElementById('vw-tags').value = '';
+            document.getElementById('vw-description').value = '';
+            document.getElementById('vw-tech').value = '';
+            document.getElementById('vw-video-status').innerText = '尚未上传视频';
+            document.getElementById('vw-video-btn-text').innerText = '上传视频';
+            document.getElementById('vw-thumb-status').innerText = '尚未上传封面';
+            document.getElementById('vw-thumb-btn-text').innerText = '上传封面';
+            videoWorkModal.classList.add('active');
+        }
+
+        function openEditVideoWorkModal(workId) {
+            const work = videoWorks.find(w => w.id === workId);
+            if (!work) return;
+
+            document.getElementById('video-work-modal-title').innerText = '编辑视频作品';
+            document.getElementById('vw-id').value = work.id;
+            document.getElementById('vw-title').value = work.title;
+            document.getElementById('vw-tags').value = (work.tags || []).join(', ');
+            document.getElementById('vw-description').value = work.description || '';
+            document.getElementById('vw-tech').value = work.tech_stack || '';
+
+            if (work.video_url) {
+                document.getElementById('vw-video-status').innerText = `已上传: ${work.video_url}`;
+                document.getElementById('vw-video-btn-text').innerText = '替换视频';
+            } else {
+                document.getElementById('vw-video-status').innerText = '尚未上传视频';
+                document.getElementById('vw-video-btn-text').innerText = '上传视频';
+            }
+
+            if (work.thumbnail_url) {
+                document.getElementById('vw-thumb-status').innerText = `已上传: ${work.thumbnail_url}`;
+                document.getElementById('vw-thumb-btn-text').innerText = '替换封面';
+            } else {
+                document.getElementById('vw-thumb-status').innerText = '尚未上传封面';
+                document.getElementById('vw-thumb-btn-text').innerText = '上传封面';
+            }
+
+            videoWorkModal.classList.add('active');
+        }
+
+        function closeVideoWorkModal() {
+            videoWorkModal.classList.remove('active');
+        }
+
+        async function submitVideoWork(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('vw-id').value;
+            const payload = {
+                title: document.getElementById('vw-title').value,
+                tags: document.getElementById('vw-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
+                description: document.getElementById('vw-description').value.trim(),
+                tech_stack: document.getElementById('vw-tech').value.trim()
+            };
+
+            try {
+                let res;
+                if (id !== '') {
+                    res = await fetch(`/api/video-works/${id}`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    res = await fetch('/api/video-works', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(id !== '' ? '视频作品已更新' : '视频作品已创建', 'success');
+                    closeVideoWorkModal();
+                    fetchVideoWorks();
+                } else {
+                    showToast(data.detail || '操作失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，操作失败', 'error');
+            }
+        }
+
+        async function deleteVideoWork(workId) {
+            if (!confirm('确定删除该视频作品？删除后不可恢复。')) return;
+
+            try {
+                const res = await fetch(`/api/video-works/${workId}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('视频作品已删除', 'success');
+                    fetchVideoWorks();
+                } else {
+                    showToast(data.detail || '删除失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，删除失败', 'error');
+            }
+        }
+
+        async function uploadVideoWorkVideo(inputElement) {
+            const file = inputElement.files && inputElement.files[0];
+            if (!file) return;
+
+            if (file.size > 100 * 1024 * 1024) {
+                showToast('视频文件过大，最大支持 100MB', 'error');
+                return;
+            }
+
+            const workId = document.getElementById('vw-id').value;
+            if (workId === '') {
+                showToast('请先保存作品信息后再上传视频', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showToast('正在上传视频...', 'info');
+                const res = await fetch(`/api/video-works/${workId}/upload-video`, {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': sessionStorage.getItem('admin_password') || '' },
+                    body: formData
+                });
+
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('视频上传成功！', 'success');
+                    document.getElementById('vw-video-status').innerText = `已上传: ${data.filename}`;
+                    document.getElementById('vw-video-btn-text').innerText = '替换视频';
+                    fetchVideoWorks();
+                } else {
+                    showToast(data.detail || '上传失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，上传失败', 'error');
+            } finally {
+                inputElement.value = '';
+            }
+        }
+
+        async function uploadVideoWorkThumbnail(inputElement) {
+            const file = inputElement.files && inputElement.files[0];
+            if (!file) return;
+
+            const workId = document.getElementById('vw-id').value;
+            if (workId === '') {
+                showToast('请先保存作品信息后再上传封面', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showToast('正在上传封面...', 'info');
+                const res = await fetch(`/api/video-works/${workId}/upload-thumbnail`, {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': sessionStorage.getItem('admin_password') || '' },
+                    body: formData
+                });
+
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('封面上传成功！', 'success');
+                    document.getElementById('vw-thumb-status').innerText = `已上传: ${data.filename}`;
+                    document.getElementById('vw-thumb-btn-text').innerText = '替换封面';
+                    fetchVideoWorks();
+                } else {
+                    showToast(data.detail || '上传失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，上传失败', 'error');
+            } finally {
+                inputElement.value = '';
+            }
+        }
+
+        // ==========================================
+        // 6.5 技能管理
+        // ==========================================
+        let skillsData = [];
+        const skillModal = document.getElementById('skill-modal');
+
+        async function fetchSkills() {
+            try {
+                const res = await fetch('/api/skills');
+                skillsData = await res.json();
+                renderSkills();
+            } catch (err) {
+                console.error('获取技能失败:', err);
+            }
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skills-container');
+            container.innerHTML = '';
+
+            if (skillsData.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);"><i data-lucide="award" style="width:48px;height:48px;margin-bottom:16px;opacity:0.3;"></i><p>暂无技能，点击右上角"新增技能"开始添加。</p></div>';
+                lucide.createIcons();
+                return;
+            }
+
+            skillsData.forEach(skill => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.innerHTML = `
+                    <div style="padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                            <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(skill.title)}</h3>
+                            <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;margin-left:8px;">${skill.proficiency}%</span>
+                        </div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">图标: <code>${escapeHtml(skill.icon)}</code></p>
+                        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5;">${escapeHtml(skill.description || '暂无描述')}</p>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button class="btn" onclick="moveSkill(${skill.id}, -1)" style="background:#f1f5f9;color:var(--text-main);font-size:0.85rem;padding:8px 12px;${skill.id === 0 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === 0 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-up"></i>
+                            </button>
+                            <button class="btn" onclick="moveSkill(${skill.id}, 1)" style="background:#f1f5f9;color:var(--text-main);font-size:0.85rem;padding:8px 12px;${skill.id === skillsData.length - 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === skillsData.length - 1 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-down"></i>
+                            </button>
+                            <button class="btn" onclick="openEditSkillModal(${skill.id})" style="background:var(--primary);color:#fff;font-size:0.85rem;padding:8px 16px;">
+                                <i data-lucide="edit-3"></i> 编辑
+                            </button>
+                            <button class="btn" onclick="deleteSkill(${skill.id})" style="background-color:#fee2e2;color:#dc2626;font-size:0.85rem;padding:8px 16px;">
+                                <i data-lucide="trash-2"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openCreateSkillModal() {
+            document.getElementById('skill-modal-title').innerText = '新增技能';
+            document.getElementById('skill-id').value = '';
+            document.getElementById('skill-title').value = '';
+            document.getElementById('skill-icon').value = 'code';
+            document.getElementById('skill-desc').value = '';
+            document.getElementById('skill-proficiency').value = '80';
+            skillModal.classList.add('active');
+        }
+
+        function openEditSkillModal(skillId) {
+            const skill = skillsData.find(s => s.id === skillId);
+            if (!skill) return;
+            document.getElementById('skill-modal-title').innerText = '编辑技能';
+            document.getElementById('skill-id').value = skill.id;
+            document.getElementById('skill-title').value = skill.title;
+            document.getElementById('skill-icon').value = skill.icon || '';
+            document.getElementById('skill-desc').value = skill.description || '';
+            document.getElementById('skill-proficiency').value = skill.proficiency || 80;
+            skillModal.classList.add('active');
+        }
+
+        function closeSkillModal() {
+            skillModal.classList.remove('active');
+        }
+
+        async function submitSkill(event) {
+            event.preventDefault();
+            const id = document.getElementById('skill-id').value;
+            const payload = {
+                title: document.getElementById('skill-title').value,
+                icon: document.getElementById('skill-icon').value.trim() || 'code',
+                description: document.getElementById('skill-desc').value.trim(),
+                proficiency: parseInt(document.getElementById('skill-proficiency').value) || 80
+            };
+
+            try {
+                let res;
+                if (id !== '') {
+                    res = await fetch(`/api/skills/${id}`, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
+                } else {
+                    res = await fetch('/api/skills', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
+                }
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast(id !== '' ? '技能已更新' : '技能已创建', 'success');
+                    closeSkillModal();
+                    fetchSkills();
+                } else {
+                    showToast(data.detail || '操作失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常', 'error');
+            }
+        }
+
+        async function deleteSkill(skillId) {
+            if (!confirm('确定删除该技能？')) return;
+            try {
+                const res = await fetch(`/api/skills/${skillId}`, { method: 'DELETE', headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    showToast('管理员授权过期', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast('技能已删除', 'success');
+                    fetchSkills();
+                } else {
+                    showToast(data.detail || '删除失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常', 'error');
+            }
+        }
+
+        async function moveSkill(skillId, direction) {
+            const ids = skillsData.map(s => s.id);
+            const idx = ids.indexOf(skillId);
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= ids.length) return;
+            [ids[idx], ids[newIdx]] = [ids[newIdx], ids[idx]];
+            try {
+                const res = await fetch('/api/skills/reorder', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(ids) });
+                if (res.status === 401) {
+                    showToast('管理员授权过期', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast('排序已更新', 'success');
+                    fetchSkills();
+                }
+            } catch (err) {
+                showToast('网络请求异常', 'error');
+            }
+        }
+
+        // ==========================================
+        // 7. UI 控制辅助函数
         // ==========================================
         // Tab 切换
         function switchPanel(panelId, btnElement) {
@@ -1530,6 +2389,8 @@
 
             // 切换标签时主动刷新对应的数据
             if (panelId === 'projects') fetchProjects();
+            if (panelId === 'video-works') fetchVideoWorks();
+            if (panelId === 'skills') fetchSkills();
             if (panelId === 'messages') fetchMessages();
             if (panelId === 'profile') fetchProfile();
         }
