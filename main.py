@@ -148,6 +148,7 @@ class ProjectCreateSchema(BaseModel):
     techDetails: str = Field(default="", max_length=3000)
     outcome: str = Field(default="", max_length=2000)
     github_url: str = Field(default="", max_length=500)
+    hidden: bool = Field(default=False)
 
 
 class ProjectUpdateSchema(BaseModel):
@@ -160,6 +161,7 @@ class ProjectUpdateSchema(BaseModel):
     techDetails: str = Field(..., max_length=3000)
     outcome: str = Field(..., max_length=2000)
     github_url: str = Field(default="", max_length=500)
+    hidden: bool = Field(default=False)
 
 
 class MessageCreateSchema(BaseModel):
@@ -239,7 +241,18 @@ def admin_login(payload: dict, request: Request):
 # ==========================================
 @app.get("/api/projects")
 def get_projects():
-    """获取所有项目的数据"""
+    """获取所有未隐藏的项目（前端公开接口，按隐藏状态过滤并重新编号显示序号）"""
+    all_projects = read_json_file(PROJECTS_FILE, [])
+    visible = [p for p in all_projects if not p.get("hidden", False)]
+    # 重新编号 display_id（从0开始连续）
+    for i, p in enumerate(visible):
+        p["display_id"] = i
+    return visible
+
+
+@app.get("/api/admin/projects")
+def get_admin_projects(authenticated: bool = Depends(verify_admin)):
+    """获取所有项目包括已隐藏的（管理后台接口）"""
     return read_json_file(PROJECTS_FILE, [])
 
 
@@ -261,7 +274,8 @@ def create_project(project_data: ProjectCreateSchema, authenticated: bool = Depe
             "context": project_data.context,
             "techDetails": project_data.techDetails,
             "outcome": project_data.outcome,
-            "github_url": project_data.github_url
+            "github_url": project_data.github_url,
+            "hidden": project_data.hidden
         }
         projects.append(new_project)
         _write_json_unlocked(PROJECTS_FILE, projects)
@@ -299,13 +313,27 @@ def update_project(project_id: int, project_data: ProjectUpdateSchema, authentic
             "context": project_data.context,
             "techDetails": project_data.techDetails,
             "outcome": project_data.outcome,
-            "github_url": project_data.github_url
+            "github_url": project_data.github_url,
+            "hidden": project_data.hidden
         }
         
         projects[target_index] = updated_project
         _write_json_unlocked(PROJECTS_FILE, projects)
     
     return {"success": True, "message": f"项目 ID {project_id} 信息已成功更新"}
+
+
+@app.post("/api/projects/{project_id}/toggle-hidden")
+def toggle_project_hidden(project_id: int, authenticated: bool = Depends(verify_admin)):
+    """切换项目的隐藏/显示状态"""
+    with _file_lock:
+        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+        for p in projects:
+            if p.get("id") == project_id:
+                p["hidden"] = not p.get("hidden", False)
+                _write_json_unlocked(PROJECTS_FILE, projects)
+                return {"success": True, "hidden": p["hidden"], "message": "项目已隐藏" if p["hidden"] else "项目已显示"}
+        raise HTTPException(status_code=404, detail=f"未找到 ID 为 {project_id} 的项目")
 
 
 @app.delete("/api/projects/{project_id}")

@@ -1313,7 +1313,9 @@
         // 获取并渲染项目列表
         async function fetchProjects() {
             try {
-                const res = await fetch('/api/projects');
+                const res = await fetch('/api/admin/projects', {
+                    headers: { 'X-Admin-Password': sessionStorage.getItem('admin_password') || '' }
+                });
                 const projects = await res.json();
                 loadedProjects = projects;
                 renderProjects(projects);
@@ -1465,13 +1467,15 @@
             }
 
             projects.forEach((proj, idx) => {
+                const isHidden = proj.hidden || false;
                 const card = document.createElement('div');
                 card.className = 'project-edit-card';
                 card.dataset.projectId = proj.id;
+                if (isHidden) card.style.opacity = '0.5';
                 card.innerHTML = `
                     <div class="project-card-header">
                         <h3>${escapeHtml(proj.title)}</h3>
-                        <span class="project-card-num">项目 ${idx + 1}</span>
+                        <span class="project-card-num">${isHidden ? '🔒 已隐藏' : '项目 ' + (idx + 1)}</span>
                     </div>
                     <p>${escapeHtml(proj.context || '暂无描述')}</p>
                     <div style="font-size: 0.8rem; color: var(--text-muted);">
@@ -1486,6 +1490,9 @@
                                 <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
                             </button>
                         </div>
+                        <button class="btn" style="padding:6px 12px;font-size:0.85rem;background:${isHidden ? '#fef9c3' : '#f0fdf4'};color:${isHidden ? '#ca8a04' : '#16a34a'};" onclick="toggleHidden(${proj.id})" title="${isHidden ? '显示' : '隐藏'}">
+                            <i data-lucide="${isHidden ? 'eye' : 'eye-off'}" style="width:14px;height:14px;"></i> ${isHidden ? '显示' : '隐藏'}
+                        </button>
                         <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openEditModal(${proj.id})">
                             <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> 编辑信息
                         </button>
@@ -1536,6 +1543,30 @@
                 }
             } catch (err) {
                 showToast('网络错误，排序失败', 'error');
+            }
+        }
+
+        // 切换项目隐藏/显示
+        async function toggleHidden(projectId) {
+            try {
+                const res = await fetch(`/api/projects/${projectId}/toggle-hidden`, {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': sessionStorage.getItem('admin_password') || '' }
+                });
+                if (res.status === 401) {
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    fetchProjects();
+                } else {
+                    showToast(data.message || '操作失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络错误', 'error');
             }
         }
 
