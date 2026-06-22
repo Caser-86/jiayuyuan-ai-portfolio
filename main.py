@@ -21,6 +21,8 @@ app = FastAPI(
     description="基于 FastAPI 构建，提供项目数据读取与修改、图像文件上传和留言板管理功能。"
 )
 
+
+
 # CORS 限制为指定域名（生产环境）
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
@@ -47,6 +49,17 @@ _rate_limit_store: Dict[str, list] = defaultdict(list)
 RATE_LIMIT_WINDOW = 60  # 秒
 _last_cleanup: float = _time.time()
 _CLEANUP_INTERVAL = 300  # 每 5 分钟清理一次过期条目
+
+
+def _get_client_ip(request: Request) -> str:
+    """获取真实客户端 IP，优先读取反向代理传递的头部"""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    xri = request.headers.get("x-real-ip")
+    if xri:
+        return xri.strip()
+    return request.client.host if request.client else "unknown"
 
 
 def _cleanup_rate_limit_store():
@@ -140,7 +153,7 @@ def verify_admin(x_admin_password: Optional[str] = Header(None)):
 # ==========================================
 class ProjectCreateSchema(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
-    tags: List[str] = Field(default=[], max_length=20)
+    tags: List[str] = Field(..., min_length=1, max_length=20)
     client: str = Field(default="", max_length=100)
     duration: str = Field(default="", max_length=50)
     tech: str = Field(default="", max_length=500)
@@ -220,7 +233,7 @@ def admin_login(payload: dict, request: Request):
     # 定期清理过期限流记录
     _cleanup_rate_limit_store()
     # 简单限流：登录接口限制更严
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     now = _time.time()
     login_requests = _rate_limit_store.get(f"login:{client_ip}", [])
     _rate_limit_store[f"login:{client_ip}"] = [t for t in login_requests if now - t < RATE_LIMIT_WINDOW]
@@ -281,6 +294,30 @@ def create_project(project_data: ProjectCreateSchema, authenticated: bool = Depe
         _write_json_unlocked(PROJECTS_FILE, projects)
 
     return {"success": True, "message": f"项目已成功创建", "id": new_id}
+
+
+class ReorderRequest(BaseModel):
+    """项目排序请求体"""
+    order: list[int]  # 项目 ID 的新顺序
+
+
+@app.post("/api/projects/reorder")
+def reorder_projects(req: ReorderRequest, authenticated: bool = Depends(verify_admin)):
+    """按指定顺序重新排列项目（需要管理员密码鉴权）"""
+    with _file_lock:
+        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+        project_map = {p["id"]: p for p in projects}
+        # 按新顺序重组
+        new_projects = []
+        for new_idx, pid in enumerate(req.order):
+            if pid not in project_map:
+                raise HTTPException(status_code=400, detail=f"项目 ID {pid} 不存在")
+            proj = project_map[pid]
+            proj["id"] = new_idx
+            new_projects.append(proj)
+        _write_json_unlocked(PROJECTS_FILE, new_projects)
+
+    return {"success": True, "message": "项目顺序已成功更新"}
 
 
 @app.post("/api/projects/{project_id}")
@@ -353,30 +390,6 @@ def delete_project(project_id: int, authenticated: bool = Depends(verify_admin))
     return {"success": True, "message": f"项目 ID {project_id} 已成功删除"}
 
 
-class ReorderRequest(BaseModel):
-    """项目排序请求体"""
-    order: list[int]  # 项目 ID 的新顺序
-
-
-@app.post("/api/projects/reorder")
-def reorder_projects(req: ReorderRequest, authenticated: bool = Depends(verify_admin)):
-    """按指定顺序重新排列项目（需要管理员密码鉴权）"""
-    with _file_lock:
-        projects = read_json_file(PROJECTS_FILE, [], _locked=True)
-        project_map = {p["id"]: p for p in projects}
-        # 按新顺序重组
-        new_projects = []
-        for new_idx, pid in enumerate(req.order):
-            if pid not in project_map:
-                raise HTTPException(status_code=400, detail=f"项目 ID {pid} 不存在")
-            proj = project_map[pid]
-            proj["id"] = new_idx
-            new_projects.append(proj)
-        _write_json_unlocked(PROJECTS_FILE, new_projects)
-
-    return {"success": True, "message": "项目顺序已成功更新"}
-
-
 # ==========================================
 # 4. 图像上传 API 路由 (Image Upload)
 # ==========================================
@@ -420,25 +433,27 @@ async def upload_image(
     base_type = image_type[:-6] if is_extra else image_type
 
     filename = ""
+    proj_idx = None  # 用于 projectN 类型
+    assets_ref = ""  # 用于 projects.json 中的引用与回滚
+
     if base_type == "avatar":
         filename = "avatar.png"
     elif base_type == "hero_bg":
         filename = "hero_bg.png"
-    elif base_type in [f"project{i}" for i in range(1, 13)]:
-        if is_extra:
-            # 计算下一个序号（找最大序号+1，避免删除后覆盖）
-            proj_idx = int(base_type.replace("project", ""))
-            # 原子操作：读取-修改-写入在同一个锁内完成
-            with _file_lock:
-                projects = read_json_file(PROJECTS_FILE, [], _locked=True)
-                proj = next((p for p in projects if p["id"] == proj_idx - 1), None)
-                if not proj:
-                    raise HTTPException(status_code=404, detail=f"项目 ID {proj_idx - 1} 不存在")
+    elif re.match(r'^project\d+$', base_type):
+        proj_idx = int(base_type.replace("project", ""))
+        # 验证目标项目是否存在，并计算文件名 / 预更新 JSON
+        with _file_lock:
+            projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+            proj = next((p for p in projects if p.get("id") == proj_idx - 1), None)
+            if not proj:
+                raise HTTPException(status_code=404, detail=f"项目 ID {proj_idx - 1} 不存在")
+
+            if is_extra:
+                # 计算下一个序号（找最大序号+1，避免删除后覆盖）
                 existing = proj.get("images", [])
-                # 从现有图片中提取最大序号
                 max_num = 0
                 for img_path in existing:
-                    # 匹配 projectN_M.png 格式
                     match = re.search(rf"project{proj_idx}_(\d+)\.png$", img_path)
                     if match:
                         num = int(match.group(1))
@@ -446,50 +461,62 @@ async def upload_image(
                             max_num = num
                 next_num = max_num + 1
                 filename = f"project{proj_idx}_{next_num}.png"
-                # 更新 projects.json
+                assets_ref = f"assets/{filename}"
+                # 额外图片：先更新 JSON，文件写入失败时回滚（仅移除追加项，逻辑简单）
                 if "images" not in proj:
                     proj["images"] = [f"assets/project{proj_idx}.png"]
-                proj["images"].append(f"assets/{filename}")
+                proj["images"].append(assets_ref)
                 _write_json_unlocked(PROJECTS_FILE, projects)
-        else:
-            filename = f"{base_type}.png"
-            # 上传主图时只替换 images 数组的第一项，保留额外图片
-            proj_idx = int(base_type.replace("project", ""))
-            with _file_lock:
-                projects = read_json_file(PROJECTS_FILE, [], _locked=True)
-                proj = next((p for p in projects if p["id"] == proj_idx - 1), None)
-                if proj:
-                    existing = proj.get("images", [])
-                    new_main = f"assets/{filename}"
-                    if existing:
-                        existing[0] = new_main
-                    else:
-                        proj["images"] = [new_main]
-                    _write_json_unlocked(PROJECTS_FILE, projects)
+            else:
+                filename = f"{base_type}.png"
+                assets_ref = f"assets/{filename}"
+                # 主图：先不写 JSON，等文件保存成功后再更新 images[0]
     else:
         raise HTTPException(status_code=400, detail="未知的图片类型分类，无法保存")
 
     target_path = os.path.join(ASSETS_DIR, filename)
 
+    # 保存文件
     try:
         with open(target_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        return {"success": True, "message": f"图片已成功上传为 {filename}", "filename": filename}
     except Exception as e:
-        # 文件写入失败时，回滚 JSON 中的引用（仅对 projectN_extra 类型）
-        if is_extra and base_type in [f"project{i}" for i in range(1, 13)]:
+        # 文件写入失败时，回滚 projectN_extra 在 JSON 中追加的引用
+        if is_extra and assets_ref and proj_idx is not None:
             try:
                 with _file_lock:
                     projects = read_json_file(PROJECTS_FILE, [], _locked=True)
-                    proj = next((p for p in projects if p["id"] == proj_idx - 1), None)
-                    if proj:
-                        assets_ref = f"assets/{filename}"
-                        if assets_ref in proj.get("images", []):
-                            proj["images"].remove(assets_ref)
-                            _write_json_unlocked(PROJECTS_FILE, projects)
+                    proj = next((p for p in projects if p.get("id") == proj_idx - 1), None)
+                    if proj and assets_ref in proj.get("images", []):
+                        proj["images"].remove(assets_ref)
+                        _write_json_unlocked(PROJECTS_FILE, projects)
             except Exception:
                 pass  # 回滚失败也不应掩盖原始错误
         raise HTTPException(status_code=500, detail="保存图片文件失败，请稍后重试")
+
+    # 主图：文件保存成功后，再更新 images[0]
+    if not is_extra and re.match(r'^project\d+$', base_type):
+        try:
+            with _file_lock:
+                projects = read_json_file(PROJECTS_FILE, [], _locked=True)
+                proj = next((p for p in projects if p.get("id") == proj_idx - 1), None)
+                if proj:
+                    existing = proj.get("images", [])
+                    if existing:
+                        existing[0] = assets_ref
+                    else:
+                        proj["images"] = [assets_ref]
+                    _write_json_unlocked(PROJECTS_FILE, projects)
+        except Exception:
+            # JSON 更新失败时，清理已写入的文件
+            try:
+                if os.path.exists(target_path):
+                    os.remove(target_path)
+            except Exception:
+                pass
+            raise HTTPException(status_code=500, detail="保存图片信息失败，请稍后重试")
+
+    return {"success": True, "message": f"图片已成功上传为 {filename}", "filename": filename}
 
 
 @app.delete("/api/projects/{project_id}/images/{img_filename}")
@@ -744,11 +771,24 @@ class SkillSchema(BaseModel):
     icon: str = Field(default="code", max_length=50)
     description: str = Field(default="", max_length=500)
     proficiency: int = Field(default=80, ge=0, le=100)
+    hidden: bool = Field(default=False)
 
 
 @app.get("/api/skills")
 def get_skills():
-    """获取所有技能"""
+    """获取所有未隐藏的技能（前端公开接口，按 hidden 过滤并重新编号显示顺序）"""
+    all_skills = read_json_file(SKILLS_FILE, [])
+    visible = [s for s in all_skills if not s.get("hidden", False)]
+    # 重新编号 id / order（从 0 开始连续，保证前端顺序与动画正常）
+    for i, s in enumerate(visible):
+        s["id"] = i
+        s["order"] = i
+    return visible
+
+
+@app.get("/api/admin/skills")
+def get_admin_skills(authenticated: bool = Depends(verify_admin)):
+    """获取所有技能包括已隐藏的（管理后台接口）"""
     return read_json_file(SKILLS_FILE, [])
 
 
@@ -764,6 +804,7 @@ def create_skill(skill: SkillSchema, authenticated: bool = Depends(verify_admin)
             "icon": skill.icon,
             "description": skill.description,
             "proficiency": skill.proficiency,
+            "hidden": skill.hidden,
             "order": new_id
         }
         skills.append(new_skill)
@@ -794,6 +835,19 @@ def reorder_skills(order: List[int], authenticated: bool = Depends(verify_admin)
     return {"success": True, "message": "技能排序已更新"}
 
 
+@app.post("/api/skills/{skill_id}/toggle-hidden")
+def toggle_skill_hidden(skill_id: int, authenticated: bool = Depends(verify_admin)):
+    """切换技能的隐藏/显示状态"""
+    with _file_lock:
+        skills = read_json_file(SKILLS_FILE, [], _locked=True)
+        for s in skills:
+            if s.get("id") == skill_id:
+                s["hidden"] = not s.get("hidden", False)
+                _write_json_unlocked(SKILLS_FILE, skills)
+                return {"success": True, "hidden": s["hidden"], "message": "技能已隐藏" if s["hidden"] else "技能已显示"}
+        raise HTTPException(status_code=404, detail="未找到该技能")
+
+
 @app.post("/api/skills/{skill_id}")
 def update_skill(skill_id: int, skill: SkillSchema, authenticated: bool = Depends(verify_admin)):
     """更新技能"""
@@ -813,6 +867,7 @@ def update_skill(skill_id: int, skill: SkillSchema, authenticated: bool = Depend
             "icon": skill.icon,
             "description": skill.description,
             "proficiency": skill.proficiency,
+            "hidden": skill.hidden,
             "order": skills[target_index].get("order", target_index)
         }
         _write_json_unlocked(SKILLS_FILE, skills)
@@ -863,7 +918,7 @@ def create_message(message_data: MessageCreateSchema, request: Request):
     _cleanup_message_rate_limit_store()
     
     # 限流检查
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     now = _time.time()
     msg_requests = _message_rate_limit_store.get(f"msg:{client_ip}", [])
     _message_rate_limit_store[f"msg:{client_ip}"] = [t for t in msg_requests if now - t < _MESSAGE_RATE_LIMIT_WINDOW]
@@ -1037,7 +1092,22 @@ def sitemap_xml():
 
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    """自定义 404 页面"""
+    """自定义 404 页面：根据 Accept 头返回 HTML 或 JSON"""
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return Response(
+            status_code=404,
+            media_type="text/html",
+            content="""<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>404 页面未找到</title></head>
+<body style="font-family:sans-serif;text-align:center;padding-top:80px;color:#334155;">
+    <h1 style="font-size:3rem;color:#6366f1;">404</h1>
+    <p>页面未找到，请求的资源不存在。</p>
+    <p><a href="/" style="color:#6366f1;">返回首页</a></p>
+</body>
+</html>"""
+        )
     return JSONResponse(
         status_code=404,
         content={"detail": "页面未找到", "message": "请求的资源不存在"}

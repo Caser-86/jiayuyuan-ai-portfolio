@@ -516,7 +516,7 @@
            ========================================================================== */
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
         }
 
@@ -1639,10 +1639,6 @@
                 font-size: 15px;
             }
 
-            .skills-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
             .portfolio-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1725,10 +1721,6 @@
             .avatar-wrapper {
                 width: 200px;
                 height: 200px;
-            }
-
-            .skills-grid {
-                grid-template-columns: 1fr;
             }
 
             .portfolio-grid {
@@ -2426,7 +2418,7 @@
                 if (isValidImageUrl(imgSrc)) {
                     imgHTML = `
                         <div class="portfolio-img-wrapper">
-                            <img src="${escapeHtml(imgSrc)}?v=${ts}" alt="${escapeHtml(p.title)} 项目截图" class="portfolio-img" loading="lazy">
+                            <img src="${escapeAttr(imgSrc)}?v=${ts}" alt="${escapeHtml(p.title)} 项目截图" class="portfolio-img" loading="lazy">
                             <div class="portfolio-overlay">
                                 <button class="view-details-btn" data-project-index="${index}">查看详情</button>
                             </div>
@@ -2438,7 +2430,7 @@
                 // 多图，轮播
                 const slides = images.map((src, i) => {
                     if (isValidImageUrl(src)) {
-                        return `<div class="carousel-slide"><img src="${escapeHtml(src)}?v=${ts}" alt="${escapeHtml(p.title)} 截图${i+1}" loading="lazy"></div>`;
+                        return `<div class="carousel-slide"><img src="${escapeAttr(src)}?v=${ts}" alt="${escapeHtml(p.title)} 截图${i+1}" loading="lazy"></div>`;
                     }
                     return '';
                 }).join('');
@@ -2528,19 +2520,20 @@
                     });
                 });
 
-                // 自动轮播（每4秒）
-                const timer = setInterval(() => goToSlide(current + 1), 10000);
+                // 自动轮播（每10秒）
+                let timer = setInterval(() => goToSlide(current + 1), 10000);
                 carouselTimers.push(timer);
 
-                // 悬停暂停：记录当前活跃定时器，确保只清除当前轮播的定时器
-                let activeTimer = timer;
+                // 悬停暂停/恢复，并从全局数组中清理已停止的定时器，防止泄漏
                 const card = container.closest('.portfolio-card');
-                card.addEventListener('mouseenter', () => { clearInterval(activeTimer); activeTimer = null; });
+                card.addEventListener('mouseenter', () => {
+                    clearInterval(timer);
+                    const idx = carouselTimers.indexOf(timer);
+                    if (idx > -1) carouselTimers.splice(idx, 1);
+                });
                 card.addEventListener('mouseleave', () => {
-                    if (!activeTimer) {
-                        activeTimer = setInterval(() => goToSlide(current + 1), 10000);
-                        carouselTimers.push(activeTimer);
-                    }
+                    timer = setInterval(() => goToSlide(current + 1), 10000);
+                    carouselTimers.push(timer);
                 });
             });
         }

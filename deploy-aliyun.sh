@@ -79,7 +79,7 @@ ExecStart=/root/jiayuyuan/venv/bin/gunicorn main:app --workers 2 --worker-class 
 Restart=always
 RestartSec=5
 StandardOutput=append:/var/log/jiayuyuan.log
-StandardErrorOutput=append:/var/log/jiayuyuan.error.log
+StandardError=append:/var/log/jiayuyuan.error.log
 
 [Install]
 WantedBy=multi-user.target

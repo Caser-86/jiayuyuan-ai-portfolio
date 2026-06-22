@@ -128,6 +128,19 @@ def main():
     run(ssh, f"if [ -d /tmp/jiayuyuan-data-backup ]; then cp -rf /tmp/jiayuyuan-data-backup/* {REMOTE_DIR}/data/ 2>/dev/null; rm -rf /tmp/jiayuyuan-data-backup; echo 'data restored'; fi")
     log("用户上传的图片和数据已恢复", "OK")
 
+    # 3.6 关键数据文件优先使用本地最新版本（skills / projects）
+    step("3.6/7  覆盖最新 skills.json 与 projects.json")
+    sftp_overwrite = ssh.open_sftp()
+    for key_file in ("skills.json", "projects.json"):
+        local_path = LOCAL_DIR / "data" / key_file
+        remote_path = f"{REMOTE_DIR}/data/{key_file}"
+        if local_path.exists():
+            data = local_path.read_bytes().replace(b'\r\n', b'\n').replace(b'\r', b'')
+            with sftp_overwrite.open(remote_path, "wb") as f:
+                f.write(data)
+            log(f"已覆盖 {key_file} 为本地最新版本", "OK")
+    sftp_overwrite.close()
+
     # 4. 上传 deploy-aliyun.sh
     step("4/7  上传部署脚本")
     sftp = ssh.open_sftp()

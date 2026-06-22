@@ -1145,6 +1145,10 @@
                         <label for="skill-proficiency" class="form-label">熟练度 (0-100)</label>
                         <input type="number" id="skill-proficiency" class="form-input" min="0" max="100" value="80">
                     </div>
+                    <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="skill-hidden" style="width:18px;height:18px;cursor:pointer;">
+                        <label for="skill-hidden" class="form-label" style="margin:0;cursor:pointer;">隐藏该技能（前端不显示）</label>
+                    </div>
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
                         <button type="button" class="btn" onclick="closeSkillModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
                         <button type="submit" class="btn btn-primary">保存</button>
@@ -2246,7 +2250,12 @@
 
         async function fetchSkills() {
             try {
-                const res = await fetch('/api/skills');
+                const res = await fetch('/api/admin/skills', { headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
                 skillsData = await res.json();
                 renderSkills();
             } catch (err) {
@@ -2264,13 +2273,15 @@
                 return;
             }
 
-            skillsData.forEach(skill => {
+            skillsData.forEach((skill, idx) => {
+                const isHidden = skill.hidden || false;
                 const card = document.createElement('div');
                 card.className = 'project-card';
+                if (isHidden) card.style.opacity = '0.55';
                 card.innerHTML = `
                     <div style="padding:20px;">
                         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
-                            <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(skill.title)}</h3>
+                            <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(skill.title)} ${isHidden ? '<span style="font-size:0.7rem;background:#fef9c3;color:#ca8a04;padding:2px 8px;border-radius:8px;margin-left:8px;vertical-align:middle;">已隐藏</span>' : ''}</h3>
                             <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;margin-left:8px;">${skill.proficiency}%</span>
                         </div>
                         <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">图标: <code>${escapeHtml(skill.icon)}</code></p>
@@ -2281,6 +2292,9 @@
                             </button>
                             <button class="btn" onclick="moveSkill(${skill.id}, 1)" style="background:#f1f5f9;color:var(--text-main);font-size:0.85rem;padding:8px 12px;${skill.id === skillsData.length - 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === skillsData.length - 1 ? 'disabled' : ''}>
                                 <i data-lucide="arrow-down"></i>
+                            </button>
+                            <button class="btn" onclick="toggleSkillHidden(${skill.id})" style="background:${isHidden ? '#fef9c3' : '#f0fdf4'};color:${isHidden ? '#ca8a04' : '#16a34a'};font-size:0.85rem;padding:8px 14px;" title="${isHidden ? '显示' : '隐藏'}">
+                                <i data-lucide="${isHidden ? 'eye' : 'eye-off'}" style="width:14px;height:14px;"></i> ${isHidden ? '显示' : '隐藏'}
                             </button>
                             <button class="btn" onclick="openEditSkillModal(${skill.id})" style="background:var(--primary);color:#fff;font-size:0.85rem;padding:8px 16px;">
                                 <i data-lucide="edit-3"></i> 编辑
@@ -2303,6 +2317,7 @@
             document.getElementById('skill-icon').value = 'code';
             document.getElementById('skill-desc').value = '';
             document.getElementById('skill-proficiency').value = '80';
+            document.getElementById('skill-hidden').checked = false;
             skillModal.classList.add('active');
         }
 
@@ -2315,6 +2330,7 @@
             document.getElementById('skill-icon').value = skill.icon || '';
             document.getElementById('skill-desc').value = skill.description || '';
             document.getElementById('skill-proficiency').value = skill.proficiency || 80;
+            document.getElementById('skill-hidden').checked = skill.hidden || false;
             skillModal.classList.add('active');
         }
 
@@ -2329,7 +2345,8 @@
                 title: document.getElementById('skill-title').value,
                 icon: document.getElementById('skill-icon').value.trim() || 'code',
                 description: document.getElementById('skill-desc').value.trim(),
-                proficiency: parseInt(document.getElementById('skill-proficiency').value) || 80
+                proficiency: parseInt(document.getElementById('skill-proficiency').value) || 80,
+                hidden: document.getElementById('skill-hidden').checked
             };
 
             try {
@@ -2380,6 +2397,27 @@
             }
         }
 
+        async function toggleSkillHidden(skillId) {
+            try {
+                const res = await fetch(`/api/skills/${skillId}/toggle-hidden`, { method: 'POST', headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    showToast('管理员授权过期', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    fetchSkills();
+                } else {
+                    showToast(data.detail || '操作失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常', 'error');
+            }
+        }
+
         async function moveSkill(skillId, direction) {
             const ids = skillsData.map(s => s.id);
             const idx = ids.indexOf(skillId);
@@ -2395,8 +2433,16 @@
                     return;
                 }
                 const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.detail || '排序失败', 'error');
+                    fetchSkills();
+                    return;
+                }
                 if (data.success) {
                     showToast('排序已更新', 'success');
+                    fetchSkills();
+                } else {
+                    showToast(data.message || '排序失败', 'error');
                     fetchSkills();
                 }
             } catch (err) {
