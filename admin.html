@@ -935,13 +935,9 @@
                     </div>
 
                     <div>
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                            <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);">统计数字</label>
-                            <button type="button" class="btn" onclick="addHeroStatRow()" style="background-color:#e0e7ff;color:#4338ca;font-size:0.85rem;padding:6px 12px;">+ 添加</button>
-                        </div>
-                        <div id="hero-stats-editor" style="display:flex;flex-direction:column;gap:10px;">
-                            <!-- 动态行由 JS 渲染 -->
-                        </div>
+                        <label style="display:block;font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:6px;">统计数字（每行一个，格式：值|后缀|标签）</label>
+                        <textarea id="pf-hero-stats" class="form-input" rows="4" placeholder="3|+|年产品经验&#10;12|+|完整项目&#10;6||开源工具" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.95rem;resize:vertical;"></textarea>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">隐藏某行时在该行开头加 # 号。</p>
                     </div>
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -2621,50 +2617,34 @@
         // ==========================================
         // 7. 基本信息管理
         // ==========================================
-        // Hero 统计数字动态编辑器
-        // ==========================================
-        function renderHeroStatsEditor(stats) {
-            const container = document.getElementById('hero-stats-editor');
-            if (!container) return;
-            container.innerHTML = '';
-            if (!Array.isArray(stats) || stats.length === 0) {
-                stats = [{ value: '', suffix: '', label: '', show: true }];
-            }
-            stats.forEach(s => addHeroStatRow(s));
+        // 格式化 hero.stats 为 textarea 文本：值|后缀|标签，隐藏行加 #
+        function formatHeroStats(stats) {
+            if (!Array.isArray(stats) || !stats.length) return '';
+            return stats.map(s => {
+                const prefix = s.show === false ? '# ' : '';
+                const value = (s.value || '').replace(/\|/g, '｜');
+                const suffix = (s.suffix || '').replace(/\|/g, '｜');
+                const label = (s.label || '').replace(/\|/g, '｜');
+                return prefix + [value, suffix, label].join('|');
+            }).join('\n');
         }
 
-        function addHeroStatRow(data) {
-            data = data || { value: '', suffix: '', label: '', show: true };
-            const container = document.getElementById('hero-stats-editor');
-            if (!container) return;
-            const row = document.createElement('div');
-            row.style.cssText = 'display:grid;grid-template-columns:44px 100px 70px 1fr 36px;gap:8px;align-items:center;padding:10px;background:#f8fafc;border-radius:8px;';
-            row.innerHTML = ''
-                + '<label title="显示" style="display:flex;align-items:center;justify-content:center;cursor:pointer;height:36px;">'
-                +   '<input type="checkbox" data-field="show"' + (data.show !== false ? ' checked' : '') + ' style="width:18px;height:18px;cursor:pointer;">'
-                + '</label>'
-                + '<input type="text" data-field="value" placeholder="值" value="' + escapeAttr(data.value || '') + '" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;">'
-                + '<input type="text" data-field="suffix" placeholder="后缀" value="' + escapeAttr(data.suffix || '') + '" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;">'
-                + '<input type="text" data-field="label" placeholder="标签" value="' + escapeAttr(data.label || '') + '" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:0.9rem;">'
-                + '<button type="button" onclick="this.parentElement.remove()" title="删除" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;cursor:pointer;height:36px;width:36px;display:flex;align-items:center;justify-content:center;">'
-                +   '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></svg>'
-                + '</button>';
-            container.appendChild(row);
-        }
-
-        function collectHeroStats() {
-            const rows = document.querySelectorAll('#hero-stats-editor > div');
-            const result = [];
-            rows.forEach(row => {
-                const value = row.querySelector('[data-field="value"]').value.trim();
-                const suffix = row.querySelector('[data-field="suffix"]').value.trim();
-                const label = row.querySelector('[data-field="label"]').value.trim();
-                const show = row.querySelector('[data-field="show"]').checked;
-                if (value || label) {
-                    result.push({ value, suffix, label, show });
-                }
-            });
-            return result;
+        // 解析 hero.stats textarea 文本
+        function parseHeroStats(text) {
+            return text.split('\n')
+                .map(line => line.trim())
+                .filter(line => line)
+                .map(line => {
+                    const show = !line.startsWith('#');
+                    if (!show) line = line.substring(1).trim();
+                    const parts = line.split('|');
+                    return {
+                        value: (parts[0] || '').trim(),
+                        suffix: (parts[1] || '').trim(),
+                        label: (parts[2] || '').trim(),
+                        show
+                    };
+                });
         }
 
         // 拉取 /api/profile 并填入表单
@@ -2685,7 +2665,7 @@
                 document.getElementById('pf-hero-showStats').checked = hero.showStats !== false;
                 document.getElementById('pf-hero-showTyping').checked = hero.showTyping !== false;
                 document.getElementById('pf-hero-typingTexts').value = Array.isArray(hero.typingTexts) ? hero.typingTexts.join(', ') : '';
-                renderHeroStatsEditor(hero.stats || []);
+                document.getElementById('pf-hero-stats').value = formatHeroStats(hero.stats || []);
 
                 const primary = hero.primaryButton || {};
                 document.getElementById('pf-hero-primary-show').checked = primary.show !== false;
@@ -2810,7 +2790,7 @@
                     showStats: document.getElementById('pf-hero-showStats').checked,
                     showTyping: document.getElementById('pf-hero-showTyping').checked,
                     typingTexts,
-                    stats: collectHeroStats(),
+                    stats: parseHeroStats(document.getElementById('pf-hero-stats').value),
                     primaryButton: {
                         show: document.getElementById('pf-hero-primary-show').checked,
                         text: document.getElementById('pf-hero-primary-text').value.trim(),
