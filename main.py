@@ -1011,6 +1011,28 @@ def update_testimonials(
 PROFILE_FILE = os.path.join(DATA_DIR, "profile.json")
 
 
+class HeroStatItem(BaseModel):
+    value: str = Field("", max_length=20)
+    suffix: str = Field("", max_length=10)
+    label: str = Field("", max_length=50)
+    show: bool = Field(default=True)
+
+
+class HeroButton(BaseModel):
+    text: str = Field("", max_length=50)
+    link: str = Field("", max_length=500)
+    show: bool = Field(default=True)
+
+
+class HeroConfig(BaseModel):
+    showStats: bool = Field(default=True)
+    showTyping: bool = Field(default=True)
+    typingTexts: List[str] = Field(default_factory=lambda: ["AI 产品经理", "独立开发者", "Agent 工程化实践者"])
+    stats: List[HeroStatItem] = Field(default_factory=list)
+    primaryButton: HeroButton = Field(default_factory=lambda: HeroButton(text="查看作品集", link="#portfolio", show=True))
+    secondaryButton: HeroButton = Field(default_factory=lambda: HeroButton(text="下载简历", link="#contact", show=True))
+
+
 class ProfileSchema(BaseModel):
     email: str = Field("", max_length=200)
     wechat: str = Field("", max_length=100)
@@ -1018,6 +1040,7 @@ class ProfileSchema(BaseModel):
     status: str = Field("", max_length=100)
     statusEn: str = Field("", max_length=100)
     socials: List[Dict[str, Any]] = Field(default_factory=list)
+    hero: HeroConfig = Field(default_factory=HeroConfig)
 
     @field_validator('email')
     @classmethod
@@ -1059,7 +1082,8 @@ def update_profile(
         "wechatNote": payload.wechatNote,
         "status": payload.status,
         "statusEn": payload.statusEn,
-        "socials": payload.socials
+        "socials": payload.socials,
+        "hero": payload.hero.model_dump()
     }
     write_json_file(PROFILE_FILE, data)
     return {"success": True, "message": "基本信息已更新"}

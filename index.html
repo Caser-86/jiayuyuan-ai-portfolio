@@ -2088,28 +2088,12 @@
                     </h1>
                     <p>通过大语言模型(LLM)、多智能体协作(Multi-Agent)和企业级工作流集成，将复杂的业务流程化繁为简，打造更聪明、更高效的智能生产力工具。</p>
 
-                    <div class="hero-stats">
-                        <div class="hero-stat">
-                            <div class="hero-stat-number" data-target="3">0</div>
-                            <div class="hero-stat-label">年产品经验</div>
-                        </div>
-                        <div class="hero-stat">
-                            <div class="hero-stat-number" data-target="12">0</div>
-                            <div class="hero-stat-label">完整项目</div>
-                        </div>
-                        <div class="hero-stat">
-                            <div class="hero-stat-number" data-target="6">0</div>
-                            <div class="hero-stat-label">开源工具</div>
-                        </div>
+                    <div class="hero-stats" id="hero-stats">
+                        <!-- 由 JS 根据 /api/profile 中的 hero.stats 渲染 -->
                     </div>
 
-                    <div class="hero-buttons">
-                        <a href="#portfolio" class="btn btn-primary">
-                            查看作品集 <i data-lucide="arrow-right"></i>
-                        </a>
-                        <a href="#contact" class="btn btn-secondary">
-                            <i data-lucide="download"></i> 下载简历
-                        </a>
+                    <div class="hero-buttons" id="hero-buttons">
+                        <!-- 由 JS 根据 /api/profile 中的 hero.buttons 渲染 -->
                     </div>
                 </div>
 
@@ -2620,64 +2604,6 @@
         // ==========================================
         lucide.createIcons();
 
-        // ==========================================
-        // Hero 打字机与数字滚动动画
-        // ==========================================
-        (function initHeroAnimations() {
-            // 打字机效果
-            const typingTexts = ["AI 产品经理", "独立开发者", "Agent 工程化实践者"];
-            let textIndex = 0, charIndex = 0, isDeleting = false;
-            const typingEl = document.getElementById('hero-typing');
-            if (typingEl) {
-                function typeLoop() {
-                    const current = typingTexts[textIndex];
-                    if (isDeleting) {
-                        typingEl.textContent = current.substring(0, charIndex - 1);
-                        charIndex--;
-                    } else {
-                        typingEl.textContent = current.substring(0, charIndex + 1);
-                        charIndex++;
-                    }
-                    if (!isDeleting && charIndex === current.length) {
-                        isDeleting = true;
-                        setTimeout(typeLoop, 1800);
-                    } else if (isDeleting && charIndex === 0) {
-                        isDeleting = false;
-                        textIndex = (textIndex + 1) % typingTexts.length;
-                        setTimeout(typeLoop, 400);
-                    } else {
-                        setTimeout(typeLoop, isDeleting ? 50 : 110);
-                    }
-                }
-                typeLoop();
-            }
-
-            // 数字滚动动画
-            const statNumbers = document.querySelectorAll('.hero-stat-number');
-            if (statNumbers.length && 'IntersectionObserver' in window) {
-                const counterObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (!entry.isIntersecting) return;
-                        const el = entry.target;
-                        const target = parseInt(el.dataset.target, 10);
-                        if (isNaN(target)) return;
-                        let current = 0;
-                        const step = Math.max(1, Math.floor(target / 40));
-                        const timer = setInterval(() => {
-                            current += step;
-                            if (current >= target) {
-                                current = target;
-                                clearInterval(timer);
-                            }
-                            el.textContent = current + (target >= 10 ? '+' : '');
-                        }, 30);
-                        counterObserver.unobserve(el);
-                    });
-                }, { threshold: 0.5 });
-                statNumbers.forEach(el => counterObserver.observe(el));
-            }
-        })();
-
         // HTML 转义函数，防止 XSS 攻击（同时转义双引号以安全用于 HTML 属性上下文）
         function escapeHtml(text) {
             if (!text) return '';
@@ -3167,12 +3093,132 @@
             }
         }
 
+        // 渲染 Hero 区域：统计数字、按钮、打字机文案
+        function renderHero(hero) {
+            hero = hero || {};
+
+            // 统计数字
+            const statsContainer = document.getElementById('hero-stats');
+            if (statsContainer) {
+                if (hero.showStats && Array.isArray(hero.stats) && hero.stats.length) {
+                    statsContainer.innerHTML = hero.stats.filter(s => s.show).map((s, i) => `
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-target="${escapeHtml(s.value)}" data-suffix="${escapeHtml(s.suffix || '')}">0</div>
+                            <div class="hero-stat-label">${escapeHtml(s.label)}</div>
+                        </div>
+                    `).join('');
+                    statsContainer.style.display = 'flex';
+                    startHeroCounters();
+                } else {
+                    statsContainer.innerHTML = '';
+                    statsContainer.style.display = 'none';
+                }
+            }
+
+            // 按钮
+            const buttonsContainer = document.getElementById('hero-buttons');
+            if (buttonsContainer) {
+                const buttons = [];
+                if (hero.primaryButton && hero.primaryButton.show) {
+                    const link = escapeAttr(hero.primaryButton.link || '#');
+                    buttons.push(`<a href="${link}" class="btn btn-primary">${escapeHtml(hero.primaryButton.text)} <i data-lucide="arrow-right"></i></a>`);
+                }
+                if (hero.secondaryButton && hero.secondaryButton.show) {
+                    const link = escapeAttr(hero.secondaryButton.link || '#');
+                    const isDownload = (hero.secondaryButton.link || '').endsWith('.pdf');
+                    buttons.push(`<a href="${link}" class="btn btn-secondary"${isDownload ? ' download' : ''}><i data-lucide="download"></i> ${escapeHtml(hero.secondaryButton.text)}</a>`);
+                }
+                if (buttons.length) {
+                    buttonsContainer.innerHTML = buttons.join('');
+                    buttonsContainer.style.display = 'flex';
+                } else {
+                    buttonsContainer.innerHTML = '';
+                    buttonsContainer.style.display = 'none';
+                }
+            }
+
+            // 打字机文案
+            const typingEl = document.getElementById('hero-typing');
+            if (typingEl) {
+                const texts = hero.showTyping && Array.isArray(hero.typingTexts) && hero.typingTexts.length
+                    ? hero.typingTexts
+                    : [];
+                startTyping(typingEl, texts);
+            }
+
+            lucide.createIcons();
+        }
+
+        // 打字机启动器
+        function startTyping(el, texts) {
+            if (!el || !texts.length) { el.textContent = ''; return; }
+            let textIndex = 0, charIndex = 0, isDeleting = false;
+            function typeLoop() {
+                const current = texts[textIndex];
+                if (isDeleting) {
+                    el.textContent = current.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    el.textContent = current.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+                if (!isDeleting && charIndex === current.length) {
+                    isDeleting = true;
+                    setTimeout(typeLoop, 1800);
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    textIndex = (textIndex + 1) % texts.length;
+                    setTimeout(typeLoop, 400);
+                } else {
+                    setTimeout(typeLoop, isDeleting ? 50 : 110);
+                }
+            }
+            typeLoop();
+        }
+
+        // 数字滚动动画
+        function startHeroCounters() {
+            const statNumbers = document.querySelectorAll('.hero-stat-number');
+            if (!statNumbers.length) return;
+            if ('IntersectionObserver' in window) {
+                const counterObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        const el = entry.target;
+                        const suffix = el.dataset.suffix || '';
+                        const targetText = el.dataset.target || '0';
+                        const target = parseInt(targetText, 10);
+                        if (isNaN(target)) return;
+                        let current = 0;
+                        const step = Math.max(1, Math.floor(target / 40));
+                        const timer = setInterval(() => {
+                            current += step;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            el.textContent = current + suffix;
+                        }, 30);
+                        counterObserver.unobserve(el);
+                    });
+                }, { threshold: 0.5 });
+                statNumbers.forEach(el => counterObserver.observe(el));
+            } else {
+                statNumbers.forEach(el => {
+                    el.textContent = (el.dataset.target || '0') + (el.dataset.suffix || '');
+                });
+            }
+        }
+
         // 从后端 /api/profile 拉取"关于合作"区块的信息并填充
         async function fetchAndRenderProfile() {
             try {
                 const res = await fetch('/api/profile');
                 if (!res.ok) throw new Error('请求失败');
                 const data = await res.json();
+
+                // Hero 区域配置渲染
+                renderHero(data.hero);
 
                 // 邮箱
                 const emailLink = document.getElementById('profile-email-link');

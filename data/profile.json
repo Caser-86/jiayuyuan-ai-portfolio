@@ -10,5 +10,17 @@
       "label": "GitHub",
       "url": "https://github.com/Caser-86"
     }
-  ]
+  ],
+  "hero": {
+    "showStats": true,
+    "showTyping": true,
+    "typingTexts": ["AI 产品经理", "独立开发者", "Agent 工程化实践者"],
+    "stats": [
+      { "value": "3", "suffix": "+", "label": "年产品经验", "show": true },
+      { "value": "12", "suffix": "+", "label": "完整项目", "show": true },
+      { "value": "6", "suffix": "", "label": "开源工具", "show": true }
+    ],
+    "primaryButton": { "text": "查看作品集", "link": "#portfolio", "show": true },
+    "secondaryButton": { "text": "下载简历", "link": "#contact", "show": true }
+  }
 }
