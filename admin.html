@@ -1561,17 +1561,7 @@
                 if (isHidden) card.style.opacity = '0.5';
                 card.innerHTML = `
                     <div class="project-card-header">
-                        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
-                            <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
-                                <button class="btn" style="padding:5px 8px;font-size:0.8rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, -1)" title="上移" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
-                                    <i data-lucide="chevron-up" style="width:14px;height:14px;"></i>
-                                </button>
-                                <button class="btn" style="padding:5px 8px;font-size:0.8rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, 1)" title="下移" ${idx === projects.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
-                                    <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
-                                </button>
-                            </div>
-                            <h3 style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(proj.title)}</h3>
-                        </div>
+                        <h3>${escapeHtml(proj.title)}</h3>
                         <span class="project-card-num">${isHidden ? '🔒 已隐藏' : '项目 ' + (idx + 1)}</span>
                     </div>
                     <p>${escapeHtml(proj.context || '暂无描述')}</p>
@@ -1579,6 +1569,14 @@
                         <strong>技术栈:</strong> ${escapeHtml(proj.tags.join(', '))}
                     </div>
                     <div class="project-card-footer">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <button class="btn" style="padding:6px 10px;font-size:0.85rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, -1)" title="上移" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <i data-lucide="chevron-up" style="width:14px;height:14px;"></i>
+                            </button>
+                            <button class="btn" style="padding:6px 10px;font-size:0.85rem;background:#f1f5f9;color:#475569;" onclick="moveProject(${proj.id}, 1)" title="下移" ${idx === projects.length - 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
+                                <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+                            </button>
+                        </div>
                         <button class="btn" style="padding:6px 12px;font-size:0.85rem;background:${isHidden ? '#fef9c3' : '#f0fdf4'};color:${isHidden ? '#ca8a04' : '#16a34a'};" onclick="toggleHidden(${proj.id})" title="${isHidden ? '显示' : '隐藏'}">
                             <i data-lucide="${isHidden ? 'eye' : 'eye-off'}" style="width:14px;height:14px;"></i> ${isHidden ? '显示' : '隐藏'}
                         </button>
@@ -2395,23 +2393,19 @@
                 if (isHidden) card.style.opacity = '0.55';
                 card.innerHTML = `
                     <div style="padding:20px;">
-                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;gap:12px;">
-                            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-                                <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
-                                    <button class="btn" onclick="moveSkill(${skill.id}, -1)" style="padding:5px 8px;background:#f1f5f9;color:var(--text-main);font-size:0.8rem;${skill.id === 0 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === 0 ? 'disabled' : ''}>
-                                        <i data-lucide="arrow-up" style="width:14px;height:14px;"></i>
-                                    </button>
-                                    <button class="btn" onclick="moveSkill(${skill.id}, 1)" style="padding:5px 8px;background:#f1f5f9;color:var(--text-main);font-size:0.8rem;${skill.id === skillsData.length - 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === skillsData.length - 1 ? 'disabled' : ''}>
-                                        <i data-lucide="arrow-down" style="width:14px;height:14px;"></i>
-                                    </button>
-                                </div>
-                                <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(skill.title)} ${isHidden ? '<span style="font-size:0.7rem;background:#fef9c3;color:#ca8a04;padding:2px 8px;border-radius:8px;margin-left:8px;vertical-align:middle;">已隐藏</span>' : ''}</h3>
-                            </div>
-                            <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;flex-shrink:0;">${skill.proficiency}%</span>
+                        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                            <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(skill.title)} ${isHidden ? '<span style="font-size:0.7rem;background:#fef9c3;color:#ca8a04;padding:2px 8px;border-radius:8px;margin-left:8px;vertical-align:middle;">已隐藏</span>' : ''}</h3>
+                            <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;margin-left:8px;">${skill.proficiency}%</span>
                         </div>
                         <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">图标: <code>${escapeHtml(skill.icon)}</code></p>
                         <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5;">${escapeHtml(skill.description || '暂无描述')}</p>
                         <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button class="btn" onclick="moveSkill(${skill.id}, -1)" style="background:#f1f5f9;color:var(--text-main);font-size:0.85rem;padding:8px 12px;${skill.id === 0 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === 0 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-up"></i>
+                            </button>
+                            <button class="btn" onclick="moveSkill(${skill.id}, 1)" style="background:#f1f5f9;color:var(--text-main);font-size:0.85rem;padding:8px 12px;${skill.id === skillsData.length - 1 ? 'opacity:0.3;cursor:not-allowed;' : ''}" ${skill.id === skillsData.length - 1 ? 'disabled' : ''}>
+                                <i data-lucide="arrow-down"></i>
+                            </button>
                             <button class="btn" onclick="toggleSkillHidden(${skill.id})" style="background:${isHidden ? '#fef9c3' : '#f0fdf4'};color:${isHidden ? '#ca8a04' : '#16a34a'};font-size:0.85rem;padding:8px 14px;" title="${isHidden ? '显示' : '隐藏'}">
                                 <i data-lucide="${isHidden ? 'eye' : 'eye-off'}" style="width:14px;height:14px;"></i> ${isHidden ? '显示' : '隐藏'}
                             </button>
