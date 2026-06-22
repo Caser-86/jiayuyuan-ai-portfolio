@@ -417,6 +417,42 @@
             gap: 16px;
         }
 
+        .hero-typing {
+            color: var(--accent);
+            border-right: 3px solid var(--accent);
+            padding-right: 6px;
+            animation: typingCursor 0.8s infinite;
+        }
+
+        @keyframes typingCursor {
+            50% { border-color: transparent; }
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-number {
+            font-family: var(--font-title);
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
         .hero-buttons .btn-secondary {
             border-color: rgba(255, 255, 255, 0.3);
             color: #ffffff;
@@ -614,6 +650,101 @@
             background: var(--gradient-primary);
             border-radius: 4px;
             transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 技能视图切换 */
+        .skills-toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .skills-view-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-family: var(--font-title);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .skills-view-toggle:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .skills-view-toggle.active {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* 雷达图 */
+        .skills-radar-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 48px;
+            align-items: center;
+            justify-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .skills-radar-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .skills-radar-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .skills-radar-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .skills-radar-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .skills-radar-legend-text {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .skills-radar-legend-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .skills-radar-legend-level {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
         }
 
         /* ==========================================================================
@@ -879,6 +1010,63 @@
             transform: translateX(4px);
         }
 
+        /* 成果标签 */
+        .project-impact-tag {
+            background-color: rgba(34, 197, 94, 0.12) !important;
+            color: #22c55e !important;
+        }
+
+        /* 量化指标 */
+        .project-metrics {
+            display: flex;
+            gap: 16px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .project-metric {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .project-metric strong {
+            color: var(--text-main);
+            font-size: 0.9rem;
+            display: block;
+            font-weight: 700;
+        }
+
+        /* 卡片底部操作区 */
+        .portfolio-card-actions {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .portfolio-demo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition-fast);
+        }
+
+        .portfolio-demo-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
         /* ==========================================================================
            6. 作品详情模态框 (Modal)
            ========================================================================== */
@@ -1041,6 +1229,33 @@
             margin-top: 40px;
             display: flex;
             gap: 16px;
+        }
+
+        .modal-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .modal-result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .modal-result-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .modal-result-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
         /* ==========================================================================
@@ -1714,6 +1929,14 @@
                 font-size: 1.15rem;
             }
 
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-stat {
+                text-align: center;
+            }
+
             .hero-buttons {
                 justify-content: center;
             }
@@ -1859,14 +2082,33 @@
                     <div class="hero-badge">
                         <i data-lucide="sparkles"></i> 资深 AI Agent & 自动化工程师
                     </div>
-                    <h1>专注于智能解决方案开发，<br>帮助业务自动化升级</h1>
+                    <h1>
+                        专注于智能解决方案开发，<br>
+                        <span class="hero-typing" id="hero-typing"></span>
+                    </h1>
                     <p>通过大语言模型(LLM)、多智能体协作(Multi-Agent)和企业级工作流集成，将复杂的业务流程化繁为简，打造更聪明、更高效的智能生产力工具。</p>
+
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-target="3">0</div>
+                            <div class="hero-stat-label">年产品经验</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-target="12">0</div>
+                            <div class="hero-stat-label">完整项目</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-target="6">0</div>
+                            <div class="hero-stat-label">开源工具</div>
+                        </div>
+                    </div>
+
                     <div class="hero-buttons">
                         <a href="#portfolio" class="btn btn-primary">
                             查看作品集 <i data-lucide="arrow-right"></i>
                         </a>
                         <a href="#contact" class="btn btn-secondary">
-                            联系我
+                            <i data-lucide="download"></i> 下载简历
                         </a>
                     </div>
                 </div>
@@ -1898,8 +2140,23 @@
                 <p>沉淀自多个垂直领域的项目实战，提供从模型适配、业务编排到最终交付的一站式 AI 解决方案。</p>
             </div>
 
-            <div class="skills-grid" id="skills-grid">
-                <!-- 技能卡片将通过 JavaScript API 动态获取并渲染 -->
+            <div class="skills-toolbar reveal-element">
+                <button class="skills-view-toggle active" data-view="cards" onclick="switchSkillView('cards')">
+                    <i data-lucide="layout-grid" style="width:16px;height:16px;"></i> 卡片视图
+                </button>
+                <button class="skills-view-toggle" data-view="radar" onclick="switchSkillView('radar')">
+                    <i data-lucide="radar" style="width:16px;height:16px;"></i> 能力雷达
+                </button>
+            </div>
+
+            <div class="skills-content" id="skills-content">
+                <div class="skills-grid" id="skills-grid">
+                    <!-- 技能卡片将通过 JavaScript API 动态获取并渲染 -->
+                </div>
+                <div class="skills-radar-wrapper" id="skills-radar" style="display:none;">
+                    <svg id="skills-radar-svg" viewBox="0 0 300 300" width="300" height="300"></svg>
+                    <div class="skills-radar-legend" id="skills-radar-legend"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -2256,14 +2513,19 @@
             <img src="assets/project1.png" alt="Project Large Preview" class="modal-img" id="modal-img">
             <div class="modal-body">
                 <div class="modal-header">
-                    <div class="modal-tags" id="modal-tags">
-                        <!-- 动态生成 -->
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <h2 id="modal-title">项目标题</h2>
-                        <a id="modal-github-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;color:var(--primary);font-size:0.9rem;text-decoration:none;align-items:center;gap:4px;">
-                            <i data-lucide="github" style="width:18px;height:18px;"></i> GitHub
-                        </a>
+                    <div>
+                        <div class="modal-tags" id="modal-tags">
+                            <!-- 动态生成 -->
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <h2 id="modal-title">项目标题</h2>
+                            <a id="modal-github-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;color:var(--primary);font-size:0.9rem;text-decoration:none;align-items:center;gap:4px;">
+                                <i data-lucide="github" style="width:18px;height:18px;"></i> GitHub
+                            </a>
+                            <a id="modal-demo-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;background:var(--primary);color:#fff;padding:4px 12px;border-radius:6px;font-size:0.8rem;text-decoration:none;align-items:center;gap:4px;">
+                                在线体验 <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-desc-box">
@@ -2274,6 +2536,9 @@
                         <p id="modal-tech-details">技术路径描述...</p>
                         <h3>项目成果与商业价值</h3>
                         <p id="modal-outcome">商业价值描述...</p>
+                        <div class="modal-results" id="modal-results">
+                            <!-- 动态生成成果数据卡片 -->
+                        </div>
                     </div>
                     <div class="modal-meta-right">
                         <div class="modal-meta-item">
@@ -2355,6 +2620,64 @@
         // ==========================================
         lucide.createIcons();
 
+        // ==========================================
+        // Hero 打字机与数字滚动动画
+        // ==========================================
+        (function initHeroAnimations() {
+            // 打字机效果
+            const typingTexts = ["AI 产品经理", "独立开发者", "Agent 工程化实践者"];
+            let textIndex = 0, charIndex = 0, isDeleting = false;
+            const typingEl = document.getElementById('hero-typing');
+            if (typingEl) {
+                function typeLoop() {
+                    const current = typingTexts[textIndex];
+                    if (isDeleting) {
+                        typingEl.textContent = current.substring(0, charIndex - 1);
+                        charIndex--;
+                    } else {
+                        typingEl.textContent = current.substring(0, charIndex + 1);
+                        charIndex++;
+                    }
+                    if (!isDeleting && charIndex === current.length) {
+                        isDeleting = true;
+                        setTimeout(typeLoop, 1800);
+                    } else if (isDeleting && charIndex === 0) {
+                        isDeleting = false;
+                        textIndex = (textIndex + 1) % typingTexts.length;
+                        setTimeout(typeLoop, 400);
+                    } else {
+                        setTimeout(typeLoop, isDeleting ? 50 : 110);
+                    }
+                }
+                typeLoop();
+            }
+
+            // 数字滚动动画
+            const statNumbers = document.querySelectorAll('.hero-stat-number');
+            if (statNumbers.length && 'IntersectionObserver' in window) {
+                const counterObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) return;
+                        const el = entry.target;
+                        const target = parseInt(el.dataset.target, 10);
+                        if (isNaN(target)) return;
+                        let current = 0;
+                        const step = Math.max(1, Math.floor(target / 40));
+                        const timer = setInterval(() => {
+                            current += step;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            el.textContent = current + (target >= 10 ? '+' : '');
+                        }, 30);
+                        counterObserver.unobserve(el);
+                    });
+                }, { threshold: 0.5 });
+                statNumbers.forEach(el => counterObserver.observe(el));
+            }
+        })();
+
         // HTML 转义函数，防止 XSS 攻击（同时转义双引号以安全用于 HTML 属性上下文）
         function escapeHtml(text) {
             if (!text) return '';
@@ -2433,38 +2756,58 @@
                         return `<div class="carousel-slide"><img src="${escapeAttr(src)}?v=${ts}" alt="${escapeHtml(p.title)} 截图${i+1}" loading="lazy"></div>`;
                     }
                     return '';
-                }).join('');
-                const dots = images.map((_, i) =>
-                    `<button class="carousel-dot${i===0?' active':''}" data-slide="${i}"></button>`
-                ).join('');
-                imgHTML = `
-                    <div class="portfolio-img-wrapper">
-                        <div class="carousel-container" data-project-index="${index}" data-current="0" data-total="${images.length}">
-                            <div class="carousel-track">${slides}</div>
-                            <button class="carousel-arrow carousel-arrow-left" data-dir="-1">&#8249;</button>
-                            <button class="carousel-arrow carousel-arrow-right" data-dir="1">&#8250;</button>
-                            <div class="carousel-dots">${dots}</div>
-                        </div>
-                        <div class="portfolio-overlay">
-                            <button class="view-details-btn" data-project-index="${index}">查看详情</button>
-                        </div>
-                    </div>`;
-            }
-
-            return `
-                <div class="portfolio-card reveal-element" data-category="${category}" data-project-index="${index}">
-                    ${imgHTML}
-                    <div class="portfolio-info">
-                        <div class="portfolio-tags">${tagsHTML}</div>
-                        <h3>${escapeHtml(p.title)}</h3>
-                        <p>${excerpt}</p>
-                        <a href="#" class="portfolio-link" data-project-index="${index}">
-                            阅读案例 <i data-lucide="arrow-right"></i>
-                        </a>
-                    </div>
+                })
+            .join('');
+        const dots = images.map((_, i) =>
+            `<button class="carousel-dot${i===0?' active':''}" data-slide="${i}"></button>`
+        ).join('');
+        imgHTML = `
+            <div class="portfolio-img-wrapper">
+                <div class="carousel-container" data-project-index="${index}" data-current="0" data-total="${images.length}">
+                    <div class="carousel-track">${slides}</div>
+                    <button class="carousel-arrow carousel-arrow-left" data-dir="-1">&#8249;</button>
+                    <button class="carousel-arrow carousel-arrow-right" data-dir="1">&#8250;</button>
+                    <div class="carousel-dots">${dots}</div>
                 </div>
-            `;
-        }
+                <div class="portfolio-overlay">
+                    <button class="view-details-btn" data-project-index="${index}">查看详情</button>
+                </div>
+            </div>`;
+    }
+
+    // 成果标签与量化指标（可选，无数据时不显示）
+    const impactHTML = p.impact
+        ? `<span class="project-tag project-impact-tag">${escapeHtml(p.impact)}</span>`
+        : '';
+    const metricsHTML = (p.metrics && p.metrics.length)
+        ? `<div class="project-metrics">${p.metrics.map(m =>
+            `<div class="project-metric"><strong>${escapeHtml(m.value)}</strong>${escapeHtml(m.label)}</div>`
+        ).join('')}</div>`
+        : '';
+    const demoBtnHTML = p.demo_url
+        ? `<a href="${escapeAttr(p.demo_url)}" class="portfolio-demo-btn" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">
+                在线体验 <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+           </a>`
+        : '';
+
+    return `
+        <div class="portfolio-card reveal-element" data-category="${category}" data-project-index="${index}">
+            ${imgHTML}
+            <div class="portfolio-info">
+                <div class="portfolio-tags">${tagsHTML}${impactHTML}</div>
+                <h3>${escapeHtml(p.title)}</h3>
+                <p>${excerpt}</p>
+                ${metricsHTML}
+                <div class="portfolio-card-actions">
+                    <a href="#" class="portfolio-link" data-project-index="${index}">
+                        阅读案例 <i data-lucide="arrow-right"></i>
+                    </a>
+                    ${demoBtnHTML}
+                </div>
+            </div>
+        </div>
+    `;
+}
 
         // 将项目数组渲染到 DOM
         function renderProjects(projects) {
@@ -2592,11 +2935,106 @@
             animateSkillsProgress();
         }
 
+        // 全局缓存技能数据，供雷达图使用
+        let skillsDataCache = [];
+
+        // 切换技能视图：cards / radar
+        function switchSkillView(view) {
+            document.querySelectorAll('.skills-view-toggle').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            document.getElementById('skills-grid').style.display = view === 'cards' ? 'grid' : 'none';
+            document.getElementById('skills-radar').style.display = view === 'radar' ? 'grid' : 'none';
+            if (view === 'radar' && skillsDataCache.length) {
+                renderSkillsRadar(skillsDataCache);
+            }
+            lucide.createIcons();
+        }
+
+        // 渲染技能雷达图
+        function renderSkillsRadar(skills) {
+            const svg = document.getElementById('skills-radar-svg');
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            const center = 150, radius = 100;
+            const count = skills.length;
+            if (!count) return;
+            const angle = i => (Math.PI * 2 * i) / count - Math.PI / 2;
+            const colors = ['#6366f1','#818cf8','#a5b4fc','#c7d2fe','#ddd6fe','#f5d0fe','#e0c3fc','#c4b5fd'];
+
+            // 网格
+            for (let r = 0.2; r <= 1; r += 0.2) {
+                const points = skills.map((_, i) => {
+                    const a = angle(i);
+                    return `${center + radius * r * Math.cos(a)},${center + radius * r * Math.sin(a)}`;
+                }).join(' ');
+                const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+                poly.setAttribute('points', points);
+                poly.setAttribute('fill','none');
+                poly.setAttribute('stroke','rgba(255,255,255,0.1)');
+                svg.appendChild(poly);
+            }
+            // 轴线
+            skills.forEach((_, i) => {
+                const a = angle(i);
+                const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                line.setAttribute('x1', center); line.setAttribute('y1', center);
+                line.setAttribute('x2', center + radius * Math.cos(a));
+                line.setAttribute('y2', center + radius * Math.sin(a));
+                line.setAttribute('stroke','rgba(255,255,255,0.1)');
+                svg.appendChild(line);
+            });
+            // 数据区域
+            const dataPoints = skills.map((s, i) => {
+                const a = angle(i);
+                const level = (s.proficiency || 0) / 100;
+                return `${center + radius * level * Math.cos(a)},${center + radius * level * Math.sin(a)}`;
+            }).join(' ');
+            const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+            poly.setAttribute('points', dataPoints);
+            poly.setAttribute('fill','rgba(99,102,241,0.25)');
+            poly.setAttribute('stroke','#6366f1');
+            poly.setAttribute('stroke-width','2');
+            svg.appendChild(poly);
+            // 数据点 + 标签
+            skills.forEach((s, i) => {
+                const a = angle(i);
+                const level = (s.proficiency || 0) / 100;
+                const x = center + radius * level * Math.cos(a);
+                const y = center + radius * level * Math.sin(a);
+                const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+                c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r','4');
+                c.setAttribute('fill','#6366f1');
+                svg.appendChild(c);
+                const tx = center + (radius + 24) * Math.cos(a);
+                const ty = center + (radius + 24) * Math.sin(a);
+                const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+                text.setAttribute('x', tx); text.setAttribute('y', ty);
+                text.setAttribute('fill','#94a3b8'); text.setAttribute('font-size','11');
+                text.setAttribute('text-anchor','middle'); text.setAttribute('dominant-baseline','middle');
+                text.textContent = s.title.split('·')[0].trim();
+                svg.appendChild(text);
+            });
+            // 图例
+            document.getElementById('skills-radar-legend').innerHTML = skills.map((s, i) => `
+                <div class="skills-radar-legend-item">
+                    <div class="skills-radar-legend-dot" style="background:${colors[i % colors.length]}"></div>
+                    <div style="flex:1;">
+                        <div class="skills-radar-legend-text">${escapeHtml(s.title)}</div>
+                        <div class="skills-radar-legend-desc">${escapeHtml(s.description)}</div>
+                    </div>
+                    <div class="skills-radar-legend-level">${s.proficiency || 0}%</div>
+                </div>
+            `).join('');
+        }
+
         async function fetchAndRenderSkills() {
             try {
                 const res = await fetch('/api/skills');
                 if (!res.ok) throw new Error('请求失败');
                 const data = await res.json();
+                skillsDataCache = data;
                 renderSkillsGrid(data);
             } catch (err) {
                 console.error('加载技能数据失败:', err);
@@ -2980,6 +3418,7 @@
         const modalClient = document.getElementById('modal-client');
         const modalDuration = document.getElementById('modal-duration');
         const modalTechStack = document.getElementById('modal-tech-stack');
+        const modalResults = document.getElementById('modal-results');
 
         // 打开模态框函数（使用缓存的 API 数据）
         function openModal(projectIndex) {
@@ -3027,12 +3466,38 @@
 
             // 填充标签
             modalTags.innerHTML = '';
-            (data.tags || []).forEach(tag => {
+            (data.tags || [])
+            .forEach(tag => {
                 const span = document.createElement('span');
                 span.className = 'modal-tag';
                 span.innerText = tag;
                 modalTags.appendChild(span);
             });
+
+            // 在线体验链接
+            const demoLink = document.getElementById('modal-demo-link');
+            if (data.demo_url) {
+                demoLink.style.display = 'inline-flex';
+                demoLink.href = data.demo_url;
+            } else {
+                demoLink.style.display = 'none';
+            }
+
+            // 成果数据卡片
+            if (modalResults) {
+                if (data.metrics && data.metrics.length) {
+                    modalResults.innerHTML = data.metrics.map(m => `
+                        <div class="modal-result-card">
+                            <div class="modal-result-value">${escapeHtml(m.value)}</div>
+                            <div class="modal-result-label">${escapeHtml(m.label)}</div>
+                        </div>
+                    `).join('');
+                    modalResults.style.display = 'grid';
+                } else {
+                    modalResults.innerHTML = '';
+                    modalResults.style.display = 'none';
+                }
+            }
 
             // 开启弹窗
             modal.classList.add('active');

@@ -161,6 +161,9 @@ class ProjectCreateSchema(BaseModel):
     techDetails: str = Field(default="", max_length=3000)
     outcome: str = Field(default="", max_length=2000)
     github_url: str = Field(default="", max_length=500)
+    demo_url: str = Field(default="", max_length=500)
+    impact: str = Field(default="", max_length=100)
+    metrics: List[Dict[str, str]] = Field(default=[], max_length=10)
     hidden: bool = Field(default=False)
 
 
@@ -174,6 +177,9 @@ class ProjectUpdateSchema(BaseModel):
     techDetails: str = Field(..., max_length=3000)
     outcome: str = Field(..., max_length=2000)
     github_url: str = Field(default="", max_length=500)
+    demo_url: str = Field(default="", max_length=500)
+    impact: str = Field(default="", max_length=100)
+    metrics: List[Dict[str, str]] = Field(default=[], max_length=10)
     hidden: bool = Field(default=False)
 
 

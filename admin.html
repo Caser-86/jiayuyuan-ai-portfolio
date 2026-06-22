@@ -993,6 +993,22 @@
                         <textarea id="edit-outcome" class="form-textarea" required></textarea>
                     </div>
 
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-impact" class="form-label">核心成果标签</label>
+                            <input type="text" id="edit-impact" class="form-input" placeholder="例如: 效率提升 10x">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-demo-url" class="form-label">在线体验链接</label>
+                            <input type="url" id="edit-demo-url" class="form-input" placeholder="https://libaweiyu.xyz/demo/xxx">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-metrics" class="form-label">量化指标</label>
+                        <textarea id="edit-metrics" class="form-textarea" rows="3" placeholder="每行一个，格式：标签: 值&#10;例如：&#10;文档处理: 10万+&#10;上线周期: 3周"></textarea>
+                    </div>
+
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
                         <button type="button" class="btn" onclick="closeEditModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
                         <button type="submit" class="btn btn-primary">保存修改</button>
@@ -1057,6 +1073,22 @@
                     <div class="form-group">
                         <label for="create-outcome" class="form-label">项目成果与商业价值</label>
                         <textarea id="create-outcome" class="form-textarea"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="create-impact" class="form-label">核心成果标签</label>
+                            <input type="text" id="create-impact" class="form-input" placeholder="例如: 效率提升 10x">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-demo-url" class="form-label">在线体验链接</label>
+                            <input type="url" id="create-demo-url" class="form-input" placeholder="https://libaweiyu.xyz/demo/xxx">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-metrics" class="form-label">量化指标</label>
+                        <textarea id="create-metrics" class="form-textarea" rows="3" placeholder="每行一个，格式：标签: 值&#10;例如：&#10;文档处理: 10万+&#10;上线周期: 3周"></textarea>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
@@ -1675,7 +1707,28 @@
         // 4. 项目编辑表单提交
         // ==========================================
         const editModal = document.getElementById('edit-modal');
-        
+
+        // 解析量化指标 textarea：每行 "标签: 值"
+        function parseMetrics(textareaId) {
+            const raw = document.getElementById(textareaId).value.trim();
+            if (!raw) return [];
+            return raw.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.includes(':'))
+                .map(line => {
+                    const idx = line.indexOf(':');
+                    return {
+                        label: line.substring(0, idx).trim(),
+                        value: line.substring(idx + 1).trim()
+                    };
+                });
+        }
+
+        function formatMetrics(metrics) {
+            if (!Array.isArray(metrics) || !metrics.length) return '';
+            return metrics.map(m => `${m.label}: ${m.value}`).join('\n');
+        }
+
         function openEditModal(projectId) {
             const proj = loadedProjects.find(p => p.id === projectId);
             if (!proj) return;
@@ -1690,6 +1743,9 @@
             document.getElementById('edit-tech-details').value = proj.techDetails;
             document.getElementById('edit-outcome').value = proj.outcome;
             document.getElementById('edit-github-url').value = proj.github_url || '';
+            document.getElementById('edit-demo-url').value = proj.demo_url || '';
+            document.getElementById('edit-impact').value = proj.impact || '';
+            document.getElementById('edit-metrics').value = formatMetrics(proj.metrics);
 
             editModal.classList.add('active');
         }
@@ -1711,7 +1767,10 @@
                 context: document.getElementById('edit-context').value,
                 techDetails: document.getElementById('edit-tech-details').value,
                 outcome: document.getElementById('edit-outcome').value,
-                github_url: document.getElementById('edit-github-url').value.trim()
+                github_url: document.getElementById('edit-github-url').value.trim(),
+                demo_url: document.getElementById('edit-demo-url').value.trim(),
+                impact: document.getElementById('edit-impact').value.trim(),
+                metrics: parseMetrics('edit-metrics')
             };
 
             try {
@@ -1767,7 +1826,10 @@
                 context: document.getElementById('create-context').value,
                 techDetails: document.getElementById('create-tech-details').value,
                 outcome: document.getElementById('create-outcome').value,
-                github_url: document.getElementById('create-github-url').value.trim()
+                github_url: document.getElementById('create-github-url').value.trim(),
+                demo_url: document.getElementById('create-demo-url').value.trim(),
+                impact: document.getElementById('create-impact').value.trim(),
+                metrics: parseMetrics('create-metrics')
             };
 
             try {
