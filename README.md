@@ -2,7 +2,7 @@
 
 > 一个现代化的 AI 产品经理 / 独立开发者个人主页，含前后端、后台管理与阿里云部署。
 
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![Version](https://img.shields.io/badge/version-v0.3.0-blue)
 ![Python](https://img.shields.io/badge/python-3.11+-green)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal)
 ![License](https://img.shields.io/badge/license-MIT-orange)
@@ -16,6 +16,9 @@
 - 📦 **模块化** — 客户评价 / 关于合作等模块后端可控
 - 🎭 **显隐控制** — 项目 / 技能可在后台隐藏，前端自动过滤并重排序号
 - 🔀 **拖拽排序** — 项目 / 技能支持排序，前端布局自适应数量
+- 🎯 **面试导向首页** — Hero 打字机、关键数据、下载简历 CTA
+- 📊 **项目成果展示** — 成果标签、量化指标、在线体验链接
+- 🕸️ **技能雷达图** — 卡片视图与能力雷达图一键切换
 - 🚀 **一键部署** — Aliyun ECS 自动化部署脚本
 - 🔒 **缓存控制** — 自定义静态文件中间件保证修改即时可见
 
@@ -88,7 +91,7 @@ python auto_deploy.py
 
 ## 📝 版本
 
-当前版本：**v0.2.0**（技能管理 + 项目/技能显隐控制 + 排序 + 代码审查修复）
+当前版本：**v0.3.0**（面试导向首页 + 项目成果展示 + 技能雷达图 + 在线体验链接）
 
 详见 [CHANGELOG.md](CHANGELOG.md)。
 
