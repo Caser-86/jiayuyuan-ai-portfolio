@@ -7,6 +7,36 @@
 
 ---
 
+## [v0.2.0] - 2026-06-22
+
+### ✨ 新增
+
+- **技能管理模块** — 后台可自由增删改排序技能，前端自适应网格布局
+- **技能显隐控制** — 每个技能可单独隐藏，公开接口自动过滤并按顺序重新编号
+- **项目显隐控制** — 后台可隐藏任意项目，前端只展示未隐藏项目并重新编号
+- **项目 / 技能排序** — 管理后台支持上移/下移调整顺序，后端 `/api/projects/reorder` 与 `/api/skills/reorder` 持久化
+- **历史项目恢复** — 将最初 6 个项目作为案例 7-12 恢复并上传对应图片
+- **404 页面智能响应** — 浏览器访问返回 HTML 404 页面，API 访问返回 JSON
+
+### 🐛 修复
+
+- **项目排序失败** — `/api/projects/reorder` 路由被 `/api/projects/{project_id}` 覆盖导致 422，调整路由顺序后修复
+- **项目图片上传数量限制** — 原代码硬编码 `project1` ~ `project12`，新增第 13 个项目后无法上传，改为正则匹配任意 `projectN`
+- **创建与编辑项目 tags 校验不一致** — `ProjectCreateSchema` 允许空 tags 而 `ProjectUpdateSchema` 要求必填，统一为必填且至少 1 个
+- **技能排序前端不报错** — 后端返回 400 时前端仍提示“排序已更新”，现在会正确提示 `data.detail`
+- **图片 src 属性编码错误** — 使用 `escapeHtml` 会导致 URL 中 `&` 被转义，改为 `escapeAttr`
+- **轮播定时器内存泄漏** — 鼠标反复悬停/离开会累积大量已清除的 `setInterval` 引用
+- **`deploy-aliyun.sh` systemd 指令拼写错误** — `StandardErrorOutput` 应为 `StandardError`，导致错误日志无法写入文件
+- **留言/登录限流在反向代理后失效** — 原 `request.client.host` 取到的是 Nginx 本地地址，改为优先读取 `X-Forwarded-For` / `X-Real-IP`
+- **`upload_image` 回滚逻辑缺陷** — 主图上传时 JSON 先更新、文件写入失败后回滚不完整；重构为先写文件再写 JSON，任一失败均可安全回滚
+
+### 🔧 部署改进
+
+- **部署时保护用户数据** — `auto_deploy.py` 先备份并恢复服务器 `data/` 与 `assets/`，再用本地 `skills.json` / `projects.json` 覆盖，避免管理后台上传的图片/GitHub 地址被清空
+- **服务错误日志** — 修复 `StandardError` 后，`/var/log/jiayuyuan.error.log` 正常记录 gunicorn 错误
+
+---
+
 ## [v0.1.3] - 2026-06-14
 
 ### ✨ 新增
