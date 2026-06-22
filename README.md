@@ -2,7 +2,7 @@
 
 > 一个现代化的 AI 产品经理 / 独立开发者个人主页，含前后端、后台管理与阿里云部署。
 
-![Version](https://img.shields.io/badge/version-v0.3.0-blue)
+![Version](https://img.shields.io/badge/version-v0.3.1-blue)
 ![Python](https://img.shields.io/badge/python-3.11+-green)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal)
 ![License](https://img.shields.io/badge/license-MIT-orange)
@@ -91,7 +91,7 @@ python auto_deploy.py
 
 ## 📝 版本
 
-当前版本：**v0.3.0**（面试导向首页 + 项目成果展示 + 技能雷达图 + 在线体验链接）
+当前版本：**v0.3.1**（首页 Hero 后台可配置 + 统计数字与按钮可开关）
 
 详见 [CHANGELOG.md](CHANGELOG.md)。
 
