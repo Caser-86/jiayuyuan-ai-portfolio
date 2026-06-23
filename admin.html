@@ -966,7 +966,13 @@
                             <button type="button" class="btn btn-primary" onclick="uploadResume()">
                                 <i data-lucide="upload-cloud" style="width:16px;height:16px;"></i> 上传简历
                             </button>
-                            <a id="pf-resume-link" href="/assets/resume.pdf" target="_blank" style="font-size:0.9rem;color:var(--primary);display:none;">查看当前简历</a>
+                            <a id="pf-resume-link" href="/assets/resume.pdf" target="_blank" class="btn" style="background:#f0fdf4;color:#16a34a;display:none;">
+                                <i data-lucide="file-check-2" style="width:16px;height:16px;"></i> 查看当前简历
+                            </a>
+                        </div>
+                        <div id="pf-resume-status" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;background:#f0fdf4;color:#16a34a;font-size:0.9rem;font-weight:500;">
+                            <i data-lucide="check-circle-2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i>
+                            <span id="pf-resume-status-text"></span>
                         </div>
                         <p style="font-size:0.8rem;color:var(--text-muted);margin:8px 0 0 0;">仅支持 PDF，最大 10MB。上传后会自动保存为 assets/resume.pdf。</p>
                     </div>
@@ -2702,10 +2708,13 @@
 
         async function updateResumeLinkVisibility() {
             const linkEl = document.getElementById('pf-resume-link');
+            const statusEl = document.getElementById('pf-resume-status');
+            if (statusEl) statusEl.style.display = 'none';
             if (!linkEl) return;
             try {
                 const res = await fetch('/assets/resume.pdf', { method: 'HEAD' });
-                linkEl.style.display = res.ok ? 'inline' : 'none';
+                linkEl.style.display = res.ok ? 'inline-flex' : 'none';
+                lucide.createIcons();
             } catch (err) {
                 linkEl.style.display = 'none';
             }
@@ -2744,6 +2753,14 @@
                         secondaryLink.value = 'assets/resume.pdf';
                     }
                     updateResumeLinkVisibility();
+                    // 显示明显的成功状态
+                    const statusEl = document.getElementById('pf-resume-status');
+                    const statusText = document.getElementById('pf-resume-status-text');
+                    if (statusEl && statusText) {
+                        statusText.textContent = `简历已上传：${file.name}`;
+                        statusEl.style.display = 'block';
+                        lucide.createIcons();
+                    }
                 } else {
                     let msg = '上传失败';
                     if (typeof data.detail === 'string') msg = data.detail;
