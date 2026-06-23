@@ -2596,6 +2596,9 @@
         // 展示 Toast 弹出框
         let toastTimer = null;
         function showToast(text, type = 'success') {
+            if (typeof text !== 'string') {
+                text = JSON.stringify(text);
+            }
             const toast = document.getElementById('system-toast');
             const toastText = document.getElementById('toast-text');
             const toastIcon = document.getElementById('toast-icon');
@@ -2726,7 +2729,9 @@
             try {
                 const res = await fetch('/api/admin/resume', {
                     method: 'POST',
-                    headers: getAuthHeaders(),
+                    headers: {
+                        'X-Admin-Password': sessionStorage.getItem('admin_password') || ''
+                    },
                     body: formData
                 });
                 const data = await res.json();
@@ -2740,7 +2745,12 @@
                     }
                     updateResumeLinkVisibility();
                 } else {
-                    showToast(data.detail || '上传失败', 'error');
+                    let msg = '上传失败';
+                    if (typeof data.detail === 'string') msg = data.detail;
+                    else if (Array.isArray(data.detail) && data.detail.length) msg = data.detail.map(d => typeof d === 'string' ? d : d.msg || JSON.stringify(d)).join('; ');
+                    else if (data.message) msg = data.message;
+                    else if (typeof data === 'string') msg = data;
+                    showToast(msg, 'error');
                 }
             } catch (err) {
                 console.error('上传简历失败:', err);
