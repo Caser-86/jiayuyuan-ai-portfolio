@@ -1089,6 +1089,37 @@ def update_profile(
     return {"success": True, "message": "基本信息已更新"}
 
 
+@app.post("/api/admin/resume")
+async def upload_resume(
+    file: UploadFile = File(...),
+    authenticated: bool = Depends(verify_admin)
+):
+    """上传简历 PDF（需要管理员密码鉴权）"""
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    max_resume_size = 10 * 1024 * 1024
+    if file_size > max_resume_size:
+        raise HTTPException(status_code=400, detail="简历文件过大，最大允许 10MB")
+
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext != ".pdf":
+        raise HTTPException(status_code=400, detail="仅支持 PDF 格式简历")
+
+    if not file.content_type or "pdf" not in file.content_type.lower():
+        raise HTTPException(status_code=400, detail="上传的文件类型错误，必须为 PDF")
+
+    target_path = os.path.join(ASSETS_DIR, "resume.pdf")
+    try:
+        with open(target_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"保存简历失败：{str(e)}")
+
+    return {"success": True, "message": "简历上传成功", "url": "assets/resume.pdf"}
+
+
 # ==========================================
 # 7. 辅助路由 (Health / robots.txt / sitemap / 404)
 # ==========================================

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端优化案例 Demo · 贾玉元.AI</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+        h2 { font-size: 2rem; margin-bottom: 40px; text-align: center; }
+        .section-title { color: var(--primary); font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; text-align: center; }
+
+        /* ===== 1. Hero 区域 ===== */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at 50% 30%, rgba(99,102,241,0.15) 0%, transparent 50%);
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 999px;
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        .hero h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .hero .typing {
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+            padding-right: 6px;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink { 50% { border-color: transparent; } }
+        .hero-subtitle { font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin-bottom: 32px; }
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .stat { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 0.9rem; color: var(--text-muted); }
+        .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; border: none; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99,102,241,0.3); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        /* ===== 2. 项目卡片 ===== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .project-card {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .project-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .card-img { height: 180px; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+        .card-body { padding: 24px; }
+        .card-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .tag-tech { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .tag-impact { background: rgba(34,197,94,0.15); color: #86efac; }
+        .tag-role { background: rgba(245,158,11,0.15); color: #fcd34d; }
+        .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+        .card-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px; }
+        .card-metrics { display: flex; gap: 16px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; }
+        .metric { font-size: 0.85rem; color: var(--text-muted); }
+        .metric strong { color: var(--text); display: block; font-size: 1rem; }
+
+        /* ===== 3. 技能雷达图 ===== */
+        .skills-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+        @media (max-width: 768px) { .skills-wrapper { grid-template-columns: 1fr; } }
+        .radar-legend { display: flex; flex-direction: column; gap: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 12px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .legend-text { flex: 1; }
+        .legend-level { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* ===== 4. 项目详情页 ===== */
+        .case-study {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 24px;
+            padding: 48px;
+            backdrop-filter: blur(20px);
+        }
+        .case-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+        .case-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+        .case-subtitle { color: var(--text-muted); }
+        .case-actions { display: flex; gap: 12px; }
+        .case-section { margin-bottom: 32px; }
+        .case-section h3 { font-size: 1.1rem; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .case-section p { color: var(--text-muted); margin-bottom: 12px; }
+        .case-list { list-style: none; }
+        .case-list li { padding: 8px 0; padding-left: 24px; position: relative; color: var(--text-muted); }
+        .case-list li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: bold; }
+        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+        .result-card { background: rgba(99,102,241,0.1); border-radius: 12px; padding: 20px; text-align: center; }
+        .result-value { font-size: 1.75rem; font-weight: 800; color: var(--primary); }
+        .result-label { font-size: 0.85rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<!-- 1. Hero 区域 -->
+<section class="hero">
+    <div class="hero-badge">🚀 正在寻找新的 AI 产品机会</div>
+    <h1>
+        你好，我是贾玉元<br>
+        <span class="typing" id="typing"></span>
+    </h1>
+    <p class="hero-subtitle">
+        专注大模型 Agent、RAG 知识库与产品工程化。能把 AI 能力落地成可上线、可交付的产品。
+    </p>
+    <div class="hero-stats">
+        <div class="stat"><div class="stat-number">3+</div><div class="stat-label">年产品经验</div></div>
+        <div class="stat"><div class="stat-number">12</div><div class="stat-label">完整项目</div></div>
+        <div class="stat"><div class="stat-number">6</div><div class="stat-label">开源工具</div></div>
+    </div>
+    <div class="hero-actions">
+        <a href="#" class="btn btn-primary">📄 下载简历</a>
+        <a href="#" class="btn btn-outline">💬 预约面试</a>
+    </div>
+</section>
+
+<!-- 2. 项目卡片 -->
+<section>
+    <div class="section-title">Portfolio</div>
+    <h2>项目案例（带成果标签）</h2>
+    <div class="card-grid">
+        <div class="project-card">
+            <div class="card-img">🧠</div>
+            <div class="card-body">
+                <div class="card-meta">
+                    <span class="tag tag-tech">LangGraph</span>
+                    <span class="tag tag-tech">Multi-Agent</span>
+                    <span class="tag tag-impact">效率提升 10x</span>
+                </div>
+                <h3 class="card-title">InsightGraph · 多智能体研究引擎</h3>
+                <p class="card-desc">基于 LangGraph 的深度研究引擎，自动完成拆解、采集、评审到报告生成。</p>
+                <div class="card-metrics">
+                    <div class="metric"><strong>10万+</strong>文档处理</div>
+                    <div class="metric"><strong>3 周</strong>从 0 到上线</div>
+                    <div class="metric"><strong>独立负责</strong>产品+技术</div>
+                </div>
+            </div>
+        </div>
+        <div class="project-card">
+            <div class="card-img">📚</div>
+            <div class="card-body">
+                <div class="card-meta">
+                    <span class="tag tag-tech">RAG</span>
+                    <span class="tag tag-tech">LlamaIndex</span>
+                    <span class="tag tag-role">全栈开发</span>
+                </div>
+                <h3 class="card-title">企业知识库智能检索系统</h3>
+                <p class="card-desc">为企业内部文档构建语义检索平台，支持多格式解析与引用溯源。</p>
+                <div class="card-metrics">
+                    <div class="metric"><strong>92%</strong>检索准确率</div>
+                    <div class="metric"><strong>50%</strong>客服响应缩短</div>
+                    <div class="metric"><strong>POC → 交付</strong>2 个月</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. 技能雷达图 -->
+<section>
+    <div class="section-title">Skills</div>
+    <h2>能力雷达图</h2>
+    <div class="skills-wrapper">
+        <svg id="radar" viewBox="0 0 300 300" width="300" height="300"></svg>
+        <div class="radar-legend" id="radar-legend"></div>
+    </div>
+</section>
+
+<!-- 4. 项目详情页 -->
+<section>
+    <div class="section-title">Case Study</div>
+    <h2>完整项目案例展示</h2>
+    <article class="case-study">
+        <div class="case-header">
+            <div>
+                <h2 class="case-title">InsightGraph · 多智能体深度研究引擎</h2>
+                <p class="case-subtitle">开源项目 / 自主孵化 · 持续迭代</p>
+            </div>
+            <div class="case-actions">
+                <a href="#" class="btn btn-primary">查看 Demo</a>
+                <a href="#" class="btn btn-outline">GitHub</a>
+            </div>
+        </div>
+
+        <div class="case-section">
+            <h3>🎯 背景与挑战</h3>
+            <p>企业做竞品分析、技术趋势研究时，需要大量人工搜索、阅读、整理资料，效率低且容易遗漏关键信息。传统方案要么依赖通用搜索，要么需要配置复杂的工作流。</p>
+        </div>
+
+        <div class="case-section">
+            <h3>🧑‍💻 我的职责</h3>
+            <ul class="case-list">
+                <li>独立完成产品定义、架构设计与前后端实现</li>
+                <li>设计 6 个智能体协作流程（Planner / Collector / Analyst / Critic / Reporter）</li>
+                <li>实现多源数据接入（Web / PDF / GitHub / SEC）与证据评分机制</li>
+                <li>搭建 FastAPI + WebSocket 实时任务流与前端 Dashboard</li>
+            </ul>
+        </div>
+
+        <div class="case-section">
+            <h3>📊 关键成果</h3>
+            <div class="result-grid">
+                <div class="result-card"><div class="result-value">10x</div><div class="result-label">研究效率提升</div></div>
+                <div class="result-card"><div class="result-value">100+</div><div class="result-label">引用自动校验</div></div>
+                <div class="result-card"><div class="result-value">3周</div><div class="result-label">MVP 上线周期</div></div>
+                <div class="result-card"><div class="result-value">开源</div><div class="result-label">GitHub 持续维护</div></div>
+            </div>
+        </div>
+    </article>
+</section>
+
+<script>
+    // 1. 打字机效果
+    const texts = ["AI 产品经理", "独立开发者", "Agent 工程化实践者"];
+    let textIndex = 0, charIndex = 0, isDeleting = false;
+    const typingEl = document.getElementById('typing');
+    function type() {
+        const current = texts[textIndex];
+        if (isDeleting) {
+            typingEl.textContent = current.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            typingEl.textContent = current.substring(0, charIndex + 1);
+            charIndex++;
+        }
+        if (!isDeleting && charIndex === current.length) {
+            isDeleting = true;
+            setTimeout(type, 2000);
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            textIndex = (textIndex + 1) % texts.length;
+            setTimeout(type, 500);
+        } else {
+            setTimeout(type, isDeleting ? 50 : 120);
+        }
+    }
+    type();
+
+    // 2. 数字滚动动画
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(c => {
+        const target = parseInt(c.textContent);
+        let current = 0;
+        const step = Math.max(1, Math.floor(target / 40));
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) { current = target; clearInterval(timer); }
+            c.textContent = current + (c.textContent.includes('+') ? '+' : '');
+        }, 30);
+    });
+
+    // 3. 技能雷达图
+    const skills = [
+        { name: "AI Agent 设计", level: 0.95 },
+        { name: "产品工程化", level: 0.88 },
+        { name: "RAG / 知识库", level: 0.90 },
+        { name: "全栈开发", level: 0.82 },
+        { name: "数据分析", level: 0.78 },
+        { name: "沟通协作", level: 0.85 }
+    ];
+    const colors = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#ddd6fe', '#f5d0fe'];
+    const svg = document.getElementById('radar');
+    const center = 150, radius = 100;
+    const angle = i => (Math.PI * 2 * i) / skills.length - Math.PI / 2;
+
+    // 画网格
+    for (let r = 0.2; r <= 1; r += 0.2) {
+        const points = skills.map((_, i) => {
+            const a = angle(i);
+            const x = center + radius * r * Math.cos(a);
+            const y = center + radius * r * Math.sin(a);
+            return `${x},${y}`;
+        }).join(' ');
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        polygon.setAttribute('points', points);
+        polygon.setAttribute('fill', 'none');
+        polygon.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+        polygon.setAttribute('stroke-width', '1');
+        svg.appendChild(polygon);
+    }
+
+    // 画轴线
+    skills.forEach((_, i) => {
+        const a = angle(i);
+        const x = center + radius * Math.cos(a);
+        const y = center + radius * Math.sin(a);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', center);
+        line.setAttribute('y1', center);
+        line.setAttribute('x2', x);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+        svg.appendChild(line);
+    });
+
+    // 画数据区域
+    const dataPoints = skills.map((s, i) => {
+        const a = angle(i);
+        const x = center + radius * s.level * Math.cos(a);
+        const y = center + radius * s.level * Math.sin(a);
+        return `${x},${y}`;
+    }).join(' ');
+    const dataPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    dataPolygon.setAttribute('points', dataPoints);
+    dataPolygon.setAttribute('fill', 'rgba(99,102,241,0.25)');
+    dataPolygon.setAttribute('stroke', '#6366f1');
+    dataPolygon.setAttribute('stroke-width', '2');
+    svg.appendChild(dataPolygon);
+
+    // 画数据点
+    skills.forEach((s, i) => {
+        const a = angle(i);
+        const x = center + radius * s.level * Math.cos(a);
+        const y = center + radius * s.level * Math.sin(a);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', '#6366f1');
+        svg.appendChild(circle);
+    });
+
+    // 标签
+    skills.forEach((s, i) => {
+        const a = angle(i);
+        const x = center + (radius + 24) * Math.cos(a);
+        const y = center + (radius + 24) * Math.sin(a);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', y);
+        text.setAttribute('fill', '#94a3b8');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.textContent = s.name;
+        svg.appendChild(text);
+    });
+
+    // 图例
+    const legend = document.getElementById('radar-legend');
+    skills.forEach((s, i) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+            <div class="legend-dot" style="background:${colors[i]}"></div>
+            <div class="legend-text">${s.name}</div>
+            <div class="legend-level">${Math.round(s.level * 100)}%</div>
+        `;
+        legend.appendChild(item);
+    });
+</script>
+
+</body>
+</html>
