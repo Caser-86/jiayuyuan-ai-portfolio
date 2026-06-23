@@ -959,6 +959,13 @@
                         </div>
                     </div>
 
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:-8px;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;">
+                            <input type="checkbox" id="pf-hero-show-preview-resume">
+                            显示“预览简历”按钮（当前端次按钮链接为 PDF 时生效）
+                        </label>
+                    </div>
+
                     <div style="border-top:1px solid #e2e8f0;padding-top:20px;margin-top:20px;">
                         <h3 style="font-size:0.95rem;font-weight:600;color:var(--text-main);margin:0 0 12px 0;">简历文件</h3>
                         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -2697,6 +2704,7 @@
                 document.getElementById('pf-hero-secondary-show').checked = secondary.show !== false;
                 document.getElementById('pf-hero-secondary-text').value = secondary.text || '';
                 document.getElementById('pf-hero-secondary-link').value = secondary.link || '';
+                document.getElementById('pf-hero-show-preview-resume').checked = hero.showPreviewResume !== false;
 
                 // 检查简历文件是否存在
                 updateResumeLinkVisibility();
@@ -2893,7 +2901,8 @@
                         show: document.getElementById('pf-hero-secondary-show').checked,
                         text: document.getElementById('pf-hero-secondary-text').value.trim(),
                         link: document.getElementById('pf-hero-secondary-link').value.trim()
-                    }
+                    },
+                    showPreviewResume: document.getElementById('pf-hero-show-preview-resume').checked
                 }
             };
             try {

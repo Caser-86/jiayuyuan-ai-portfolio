@@ -1031,6 +1031,7 @@ class HeroConfig(BaseModel):
     stats: List[HeroStatItem] = Field(default_factory=list)
     primaryButton: HeroButton = Field(default_factory=lambda: HeroButton(text="查看作品集", link="#portfolio", show=True))
     secondaryButton: HeroButton = Field(default_factory=lambda: HeroButton(text="下载简历", link="#contact", show=True))
+    showPreviewResume: bool = Field(default=True)
 
 
 class ProfileSchema(BaseModel):

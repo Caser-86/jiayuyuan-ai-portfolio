@@ -2946,7 +2946,7 @@
                 grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:3rem">\u9879\u76ee\u52a0\u8f7d\u4e2d\u2026</p>';
             }
             try {
-                const res = await fetch('/api/projects');
+                const res = await fetch('/api/projects?_=' + Date.now());
                 if (!res.ok) throw new Error('\u8bf7\u6c42\u5931\u8d25');
                 const data = await res.json();
                 projectDataCache = data;
@@ -3089,7 +3089,7 @@
 
         async function fetchAndRenderSkills() {
             try {
-                const res = await fetch('/api/skills');
+                const res = await fetch('/api/skills?_=' + Date.now());
                 if (!res.ok) throw new Error('请求失败');
                 const data = await res.json();
                 skillsDataCache = data;
@@ -3259,8 +3259,10 @@
                     const link = escapeAttr(hero.secondaryButton.link || '#');
                     const isPdf = (hero.secondaryButton.link || '').endsWith('.pdf');
                     if (isPdf) {
+                        if (hero.showPreviewResume !== false) {
+                            buttons.push(`<button type="button" class="btn-preview" onclick="openResumePreview('${link}')"><i data-lucide="eye"></i> 预览简历</button>`);
+                        }
                         buttons.push(`<a href="${link}" class="btn btn-secondary" download><i data-lucide="download"></i> ${escapeHtml(hero.secondaryButton.text)}</a>`);
-                        buttons.push(`<button type="button" class="btn-preview" onclick="openResumePreview('${link}')"><i data-lucide="eye"></i> 预览简历</button>`);
                     } else {
                         buttons.push(`<a href="${link}" class="btn btn-secondary"><i data-lucide="download"></i> ${escapeHtml(hero.secondaryButton.text)}</a>`);
                     }
@@ -3378,7 +3380,7 @@
         // 从后端 /api/profile 拉取"关于合作"区块的信息并填充
         async function fetchAndRenderProfile() {
             try {
-                const res = await fetch('/api/profile');
+                const res = await fetch('/api/profile?_=' + Date.now());
                 if (!res.ok) throw new Error('请求失败');
                 const data = await res.json();
 
