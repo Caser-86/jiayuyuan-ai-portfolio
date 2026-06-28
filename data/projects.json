@@ -214,37 +214,41 @@
     "title": "销售数据预测与可视化大屏",
     "tags": [
       "PyTorch",
+      "LightGBM",
       "ECharts",
-      "Pandas"
+      "FastAPI",
+      "Docker"
     ],
-    "client": "大型商贸供应链公司",
+    "client": "自学项目（模拟数据）",
     "duration": "4 周",
-    "tech": "Python / PyTorch (LSTM) / Pandas / ECharts / Docker",
+    "tech": "Python / FastAPI / PyTorch (LSTM) / LightGBM / Pandas / ECharts / Docker",
     "images": [
       "assets/project11.png"
     ],
-    "context": "商贸物流供应链极其依赖准确的库存预测。该公司原先主要依靠销售经理的个人经验去下月采购单，经常出现爆款商品缺货影响销售，或者冷门商品滞销压仓、资金链周转低效的情况。企业急需一套能智能指导采购与销售的可视化辅助看板。",
-    "techDetails": "首先利用 Pandas 进行历史销量数据、节假日信息、大促策略、竞品价格等多元特征的清洗与工程化。基于 PyTorch 编写时间序列预测模型（LSTM + LightGBM），提供未来 30 天销量预测。前端大屏由 ECharts 构建，以暗紫色极富未来感的风格，动态展示销量折线、采购策略、热力库存分级图表。数据接口采用 Docker 容器部署，实现高频率的数据流水增量吞吐。",
-    "outcome": "系统正式运行后，其库存销量预测准确率达到了 87% 以上。帮助该公司将爆款商品缺货率降低了 62%，滞销库存周转天数减少了 18天，大幅优化了企业现金流利用效率，智能大屏也在公司展厅作为核心数字化成果进行演示。",
-    "github_url": ""
+    "context": "面向中小零售运营团队的内部数据可视化系统原型。通过生成模拟销售数据（20 SKU × 5 门店 × 181 天），实现历史销量分析、未来 30 天销售预测、库存 ABC 分级与采购建议。",
+    "techDetails": "后端使用 FastAPI 提供数据接口；机器学习侧采用 PyTorch LSTM 进行时序建模，LightGBM 处理表格特征，两者集成后 MAPE ≈ 9.91%。数据处理使用 Pandas / NumPy，模拟数据由 scripts/init_data.py 生成，模型训练由 scripts/train_models.py 完成。前端大屏基于原生 HTML/CSS/JS + ECharts 5 构建，展示 KPI、趋势图、库存热力图、品类占比与 Top 10 排行。项目使用 Docker / docker-compose 部署，并包含 61 个 pytest 测试用例。",
+    "outcome": "完成了从数据生成、模型训练到可视化大屏的完整流程，模型在模拟数据上 MAPE 约 9.91%。系统具备单 SKU 销量查看、未来 30 天预测、库存分级与采购建议等核心能力，可作为零售运营预测的参考原型。",
+    "github_url": "https://github.com/Caser-86/sales-forecast-dashboard.git"
   },
   {
     "id": 11,
     "title": "AI日程规划与会议助手",
     "tags": [
-      "LLM Tool Use",
+      "LLM",
       "FastAPI",
-      "API Integration"
+      "Vue 3",
+      "JWT",
+      "Docker"
     ],
-    "client": "知名联合办公服务商",
-    "duration": "2.5 周",
-    "tech": "FastAPI / Node.js / Google Calendar API / Claude 3",
+    "client": "自学项目（模拟数据）",
+    "duration": "3 周",
+    "tech": "Python / FastAPI / SQLModel / SQLite / JWT / Vue 3 / Docker",
     "images": [
       "assets/project12.png"
     ],
-    "context": "现代企业管理中，跨部门会议协调极其耗费精力。繁复的往来邮件与消息确认常常为确认一个共同空闲时间而浪费数小时。此外，会议结束后遗留的待办任务与日程也缺乏统一闭环跟进机制。",
-    "techDetails": "开发了一个通过微信、飞书机器人或邮件抄送直接唤醒的智能秘书。自动识别会议纪要中的行动项并添加至日历，根据各成员空闲状态智能协调会议时间。会议结束后，助理可解析上传的录音转文字纪要，提取出核心行动项(Action Items)自动转化为各自的 Todo 日程并推送提醒。",
-    "outcome": "该系统作为核心增值服务开放给办公园区内 200 余家企业使用。每月平均自动发起与规划会议 3000 余场，将协调会议的人均耗时从 15 分钟降低为 0.5 分钟。行动项的追踪达成率从 68% 提升到了 91%，成为极具口碑的自动化智能明星工具。",
-    "github_url": ""
+    "context": "基于 FastAPI + Vue 3 + LLM 的智能会议纪要分析、行动项提取与日程优化平台原型。旨在打通会议管理、任务追踪与日程规划闭环。",
+    "techDetails": "后端使用 Python / FastAPI / SQLModel / SQLite，集成 JWT 认证、bcrypt 密码哈希、admin/member 角色权限控制、统一错误响应、request_id 日志与全局异常处理。前端使用 Vue 3 + Vite + Axios。LLM 通过 OpenAI 兼容接口调用，支持 Claude / DeepSeek / GPT 等模型，实现会议纪要摘要、行动项提取、日程优化建议。功能包括会议 CRUD、任务看板（待办/进行中/已完成）、周视图日历、统计大屏，以及飞书/微信 webhook 消息推送。项目使用 Docker 多阶段构建，并包含 64 个 pytest 测试用例。",
+    "outcome": "实现了会议、任务、日程一体化管理原型，支持 AI 辅助会议纪要解析与行动项提取。测试覆盖认证、权限、CRUD、错误场景与中间件，支持 docker compose up --build -d 一键部署。",
+    "github_url": "https://github.com/Caser-86/ai-schedule-meeting-assistant.git"
   }
 ]
