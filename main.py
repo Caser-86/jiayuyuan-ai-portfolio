@@ -315,12 +315,10 @@ def reorder_projects(req: ReorderRequest, authenticated: bool = Depends(verify_a
         project_map = {p["id"]: p for p in projects}
         # 按新顺序重组
         new_projects = []
-        for new_idx, pid in enumerate(req.order):
+        for pid in req.order:
             if pid not in project_map:
                 raise HTTPException(status_code=400, detail=f"项目 ID {pid} 不存在")
-            proj = project_map[pid]
-            proj["id"] = new_idx
-            new_projects.append(proj)
+            new_projects.append(project_map[pid])
         _write_json_unlocked(PROJECTS_FILE, new_projects)
 
     return {"success": True, "message": "项目顺序已成功更新"}
@@ -388,9 +386,6 @@ def delete_project(project_id: int, authenticated: bool = Depends(verify_admin))
         projects = [p for p in projects if p.get("id") != project_id]
         if len(projects) == original_len:
             raise HTTPException(status_code=404, detail=f"未找到 ID 为 {project_id} 的项目")
-        # 重新分配 ID，保持连续
-        for i, p in enumerate(projects):
-            p["id"] = i
         _write_json_unlocked(PROJECTS_FILE, projects)
 
     return {"success": True, "message": f"项目 ID {project_id} 已成功删除"}
