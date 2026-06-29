@@ -38,10 +38,7 @@
     "tech": "Python / FastAPI / Next.js / React / Kotlin / Jetpack Compose / PostgreSQL / pgvector / 高德地图 API",
     "images": [
       "assets/project2.png",
-      "assets/project2_1.png",
-      "assets/project2_2.png",
-      "assets/project2_3.png",
-      "assets/project2_4.png"
+      "assets/project2_1.png"
     ],
     "context": "旅行者在规划行程时，往往需要在多个平台间反复切换——查景点、看攻略、比路线、做收藏，流程割裂且效率低下。同时，市面上的旅行应用大多只覆盖单一平台，无法在手机端和网页端之间无缝衔接。为此，我们打造了一款支持手机与网页双端运行的 AI 智能旅行攻略平台，通过大模型智能推荐个性化旅行路线。",
     "techDetails": "项目采用前后端分离架构，后端基于 FastAPI + PostgreSQL + pgvector 构建共享服务层，同时服务于 Web 端（Next.js / React）和 Android 原生端（Kotlin / Jetpack Compose）。核心 AI 能力基于 RAG 检索增强生成技术，将 12+ 热门景点的攻略文档进行向量化存储，结合大语言模型实现流式智能问答。用户输入旅行需求后，系统自动召回相关攻略片段，由大模型生成个性化推荐路线，并通过高德地图 API 实时渲染路线轨迹。Web 端与手机端共享同一套后端接口，支持登录收藏、离线缓存、路线联动等核心功能，实现真正的跨端一致体验。",
@@ -83,8 +80,7 @@
     "tech": "Next.js 16 / React 19 / TypeScript / Tailwind CSS 4 / Zustand / PostgreSQL / Redis / BullMQ / OpenAI Compatible API (DeepSeek) / Zod / Docker / Vitest / Playwright / R2/S3",
     "images": [
       "assets/project4.png",
-      "assets/project4_1.png",
-      "assets/project4_2.png"
+      "assets/project4_1.png"
     ],
     "context": "互动叙事类产品的核心难点在于如何让 AI 生成的剧情保持连贯性、分支合理性和完整的故事弧线。市面上的 AI 故事工具大多要么无限续写导致剧情失控，要么是预设脚本缺乏真正的随机性和分支差异。用户渴望「输入一句灵感，就能获得一个可玩的、有结局的、分支丰富的完整故事体验」，而非无尽的开放续写。",
     "techDetails": "基于 Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 构建的全栈互动叙事平台。后端采用 Next.js Route Handlers 作为 API 层，通过 OpenAI 兼容接口接入 DeepSeek 大模型进行叙事生成。核心架构包含六大服务模块：narrative-service 负责 LLM 叙事生成与 JSON Schema 约束输出，内置多层 fallback 兜底（模型异常/超时/余额不足/非标返回均有降级策略）；story-state-service 管理状态推进、上下文压缩与选择效果应用（变量/flags/inventory/relations/endingPotential）；story-arc-service 控制故事长度规划（短篇 7-12 步 / 中篇 20-40 步 / 长篇 50-100 步）、五阶段推进（setup→development→crisis→resolution→ending）与结局收束判断；safety-service 提供输入/输出安全检查与版权替换；asset-service 封装可选的场景图异步生成链路（Redis + BullMQ + Worker + R2/S3 对象存储）；user-service 处理指纹用户识别与数据清理。客户端使用 Zustand 管理全局状态与会话恢复，支持断点续玩。配套完整的工程化体系：Docker Compose 四服务编排（app/worker/db/redis）、Vitest 单元测试 + Playwright E2E、PostgreSQL 持久化、Owner Token 权限校验、只读分享 replay、JSON/Markdown 导出、可观测性统计与成本追踪。",
@@ -104,109 +100,13 @@
     "tech": "Unity 6 (6000.3.0f1) / C# / URP 17.3.0 / 2D Physics / ScriptableObject / NUnit / 程序化生成",
     "images": [
       "assets/project5.png",
-      "assets/project5_2.png",
+      "assets/project5_1.png",
       "assets/project5_3.png",
       "assets/project5_4.png"
     ],
     "context": "传统 2D 横版射击游戏通常依赖大量预制美术资源和音频素材，开发周期长、成本高。我希望从零打造一款完整的横版射击游戏，涵盖角色切换、小队系统、武器形态切换、Boss 战等核心玩法，并且所有美术素材和音效完全由代码程序化生成，实现零外部资源依赖的独立游戏开发模式。",
     "techDetails": "基于 Unity 6 + URP 渲染管线构建的 2D 横版射击游戏。架构上采用事件驱动设计（GameEvents 静态事件总线），解耦 UI、战斗、音效等模块。核心玩法系统包括：4 人小队实时切换系统（每个角色独立生命值、武器等级和技能冷却）、武器形态切换系统（3 把武器 × 3 种形态 = 9 种射击模式）、物理驱动的 2D 控制器（跳跃缓冲+土狼时间+蹲伏碰撞体调整）。敌人 AI 包含 4 种类型（步枪兵、盾牌兵、无人机、榴弹兵）和 3 阶段 MiniBoss 战。数据层使用 ScriptableObject 定义角色/敌人/武器属性，支持热编辑。美术和音频完全由 Editor 脚本程序化生成（AudioGenerator 程序化合成 WAV 音效、MusicGenerator 生成 BGM、Procedural Sprite Generator 生成像素风格精灵图），实现零外部依赖。配套 NUnit 单元测试覆盖生命值系统和武器运行时逻辑。",
     "outcome": "完成了一款可玩的 2D 横版射击游戏垂直切片，包含 3 个完整区域（海滩→村庄→战壕）+ Boss 竞技场、4 个可操作角色（Aila/Bruno/Mara/Niko，各有独特技能）、9 种射击模式、4 种敌人类型和 3 阶段 Boss 战。全部美术素材（15+ 精灵图）和音效（9 种音效 + 3 首 BGM）均由代码程序化生成，零外部资源依赖。支持一键构建 Windows 可执行文件，完整项目可通过 Unity 6 打开直接运行。",
-    "github_url": ""
-  },
-  {
-    "id": 5,
-    "title": "实时多源 AI 行业情报仓",
-    "tags": [
-      "CrewAI",
-      "Multi-Agent",
-      "Streamlit"
-    ],
-    "client": "自主孵化产品",
-    "duration": "持续迭代",
-    "tech": "Python 3.11 / CrewAI 1.14 / Streamlit 1.57 / DuckDuckGo / DeepSeek V4 / Pydantic v2 / Plotly / SQLite / pytest",
-    "images": [
-      "assets/project6.png",
-      "assets/project6_1.png"
-    ],
-    "context": "企业做行业研究、竞品分析、热点追踪时，需要在多个信息源之间反复切换搜索、阅读、整理，耗时且容易遗漏关键情报。传统 AI 问答工具缺乏实时搜索能力，输出的行业分析往往基于过时的训练数据，无法反映最新市场动态。需要一个能自动搜索、自动分析、自动可视化的智能情报系统。",
-    "techDetails": "基于 CrewAI 多智能体编排框架构建的实时情报分析系统。架构采用 Cache-first 工作流：用户输入关键词后先查 SQLite 缓存（支持 TTL），未命中则通过 DuckDuckGo 实时搜索获取最新来源，再由 CrewAI 编排 Analyst 和 Visualizer 两个 Agent 协同工作——Analyst 基于搜索结果生成结构化行业报告（InsightReport），Visualizer 将报告转化为图表结构（ChartSpec）。系统实现了三模式稳定性保障：live 模式走完整 CrewAI 管道，fallback 模式在 LLM/Agent 失败时自动降级为规则生成的保守报告，cache 模式直接返回 SQLite 缓存结果秒级响应。数据层使用 Pydantic v2 约束所有结构化输出（SourceItem、InsightReport、ChartSpec、RunMeta、RunEvent），搜索工具内置 URL 去重和坏链接跳过机制。前端使用 Streamlit 构建交互式看板，支持运行日志、Plotly 图表、Markdown 报告、来源链接、JSON/Markdown 下载。配套预热脚本和评估脚本用于演示就绪检查。",
-    "outcome": "实现了从关键词输入到结构化情报报告的全流程自动化。用户输入研究主题后，系统自动搜索最新来源、生成行业分析报告（含执行摘要、关键发现、市场信号、竞争格局、机会与风险、置信度评分）、生成雷达图可视化、保留所有来源链接。三模式设计确保演示永不崩溃：即使 LLM 不可用也能通过 fallback 或 cache 模式给出可展示输出。支持预设关键词一键演示，报告支持 JSON 和 Markdown 格式导出。",
-    "github_url": "https://github.com/Caser-86/realtime-ai-intel-warehouse"
-  },
-  {
-    "id": 6,
-    "title": "AI智能客服系统",
-    "tags": [
-      "LangChain",
-      "OpenAI",
-      "WebSockets"
-    ],
-    "client": "知名跨境电商平台",
-    "duration": "4 周",
-    "tech": "Python / FastAPI / LangChain / OpenAI API / Redis",
-    "images": [
-      "assets/project7.png"
-    ],
-    "context": "传统的人工客服面临夜间应答时延高、重复性问题占比多、人员流动频繁等严重痛点。为了解决这个问题，我们为该电商平台量身打造了多渠道智能客服系统。该系统能够直连 Shopify 与 ERP 后台，实现全天候秒级智能自动回复。",
-    "techDetails": "后端采用 FastAPI 支撑高并发 WebSockets 链接，实现打字机流式输出。对话管理底层应用 LangChain 框架，集成动态 Prompt 挂载与少样本提示词(Few-shot)。我们开发了外部工具调用能力(Tool-use)，使智能体能够在对话中主动查询物流数据库 API，并根据最新状态生成地道的外文物流追踪解答。",
-    "outcome": "上线一个月内，系统独立完成了 42% 的售前与售后咨询，人工客服介入率降低了 38%，首轮回复平均时延由 18 分钟缩短至 2 秒，极大地提升了全球买家的购物体验，并在当季度为客户节省了近 3 万元的人工运营成本。",
-    "github_url": ""
-  },
-  {
-    "id": 7,
-    "title": "企业知识库智能检索系统",
-    "tags": [
-      "RAG",
-      "VectorDB",
-      "LlamaIndex"
-    ],
-    "client": "大型科技咨询公司",
-    "duration": "3 周",
-    "tech": "Python / LlamaIndex / Qdrant / VectorDB / HuggingFace",
-    "images": [
-      "assets/project8.png"
-    ],
-    "context": "该咨询公司内部沉淀了数十万份行业白皮书、咨询方案和技术文档，但因数据格式庞杂且零散，员工检索资料耗费时间极长。原有的关键词搜索难以满足模糊语义检索和跨文档汇总分析的要求。为此，我们搭建了私有化语义检索知识库系统。",
-    "techDetails": "采用 LlamaIndex 库作为 RAG 核心框架，通过 PDF/Markdown 精准文件解析器提取非结构化文本。使用混合检索机制 (Hybrid Search: BM25 + Vector) 配合 Qdrant 向量数据库，并使用 BGE-Reranker-Large 重排序模型，确保召回文本的高相关性。另外，通过设计 Prompt Guard 与自我修正器，杜绝了通用大模型的瞎编乱造（幻觉）。",
-    "outcome": "系统完全实现了文档检索与智能整合提炼的一体化。员工搜寻历史材料与编写行业分析框架的时间由平均 1 小时压缩到 3 分钟以内，文档资产复用率提升了 220%，极大地提升了团队交付咨询方案的吞吐能力。",
-    "github_url": ""
-  },
-  {
-    "id": 8,
-    "title": "自动化日常财务报表机器人",
-    "tags": [
-      "RPA",
-      "n8n",
-      "Python"
-    ],
-    "client": "新零售连锁企业",
-    "duration": "2 周",
-    "tech": "n8n / Python / Playwright / PostgreSQL / DingTalk API",
-    "images": [
-      "assets/project9.png"
-    ],
-    "context": "该企业在全国拥有多家联营门店，每天营业结束后，运营部门需要安排专人登录 5 个不同的收银和电商平台后台，手动下载账单流水、整理合并并填报 Excel 进行日终平账。手动操作不仅繁琐，而且容易漏单、填错账目，导致审计困难。",
-    "techDetails": "基于开源工作流编排工具 n8n 构建自动化流程。通过 Playwright 编写自动化无头浏览器脚本，攻克了部分平台缺乏 API 接口的难题，稳定模拟人工扫码或账号密码登录，自动绕过基本人机校验。提取流水数据后，使用 Python 脚本进行自动化字段映射、去重与异常校验，将清洗后的数据写入集中式 PostgreSQL 数据库，最后利用模板引擎渲染出可视化的飞书/钉钉推送卡片。",
-    "outcome": "实现了 100% 的自动化对账。每天早晨 8:00 准时向管理层飞书推送精准核对的全国销售日报。运营团队每天早晨彻底释放了 2 小时的人工劳作，并且数据准确率达到 100%，规避了以往因手工处理导致对账错误而产生的额外补漏时间。",
-    "github_url": ""
-  },
-  {
-    "id": 9,
-    "title": "多Agent协作翻译审校平台",
-    "tags": [
-      "AutoGen",
-      "Translation",
-      "Agents"
-    ],
-    "client": "出海科技企业",
-    "duration": "3.5 周",
-    "tech": "Python / AutoGen / Streamlit / GPT-4o / DeepL API",
-    "images": [
-      "assets/project10.png"
-    ],
-    "context": "科技白皮书和医学说明书的英汉互译对专业术语、行业行文规范、语境流畅度要求极高。传统的机器翻译（如 Google/DeepL）往往缺乏上下文敏感度，翻译生硬且专业词汇经常出错，人工二次润色修改量大且繁琐。",
-    "techDetails": "采用 Microsoft AutoGen 框架，构建多 Agent 协同翻译模型。设计了四个独立的智能体角色：‘译员智能体’负责初步直译；‘术语监督智能体’基于预先加载 of 行业标准双语对照术语库，强制纠正翻译中的专业术语错误；‘校对智能体’审查语法和专业学术逻辑；‘润色智能体’专注于本地化阅读体验与语言优美度润色。四个智能体在虚拟讨论室中通过多轮对话最终达成最优译文。",
-    "outcome": "该平台翻译出来的学术与科技文章，在术语准确度与语句流畅性上远超单次大模型翻译和传统翻译软件。出海企业在翻译医学设备说明书和行业白皮书时，人工修正率由 70% 骤降至 15% 以内，不仅降低了译审成本，还使文档的出海交付时效提高了 3 倍。",
     "github_url": ""
   },
   {
@@ -228,7 +128,29 @@
     "context": "面向中小零售运营团队的内部数据可视化系统原型。通过生成模拟销售数据（20 SKU × 5 门店 × 181 天），实现历史销量分析、未来 30 天销售预测、库存 ABC 分级与采购建议。",
     "techDetails": "后端使用 FastAPI 提供数据接口；机器学习侧采用 PyTorch LSTM 进行时序建模，LightGBM 处理表格特征，两者集成后 MAPE ≈ 9.91%。数据处理使用 Pandas / NumPy，模拟数据由 scripts/init_data.py 生成，模型训练由 scripts/train_models.py 完成。前端大屏基于原生 HTML/CSS/JS + ECharts 5 构建，展示 KPI、趋势图、库存热力图、品类占比与 Top 10 排行。项目使用 Docker / docker-compose 部署，并包含 61 个 pytest 测试用例。",
     "outcome": "完成了从数据生成、模型训练到可视化大屏的完整流程，模型在模拟数据上 MAPE 约 9.91%。系统具备单 SKU 销量查看、未来 30 天预测、库存分级与采购建议等核心能力，可作为零售运营预测的参考原型。",
-    "github_url": "https://github.com/Caser-86/sales-forecast-dashboard.git"
+    "github_url": "https://github.com/Caser-86/sales-forecast-dashboard.git",
+    "hidden": false
+  },
+  {
+    "id": 5,
+    "title": "实时多源 AI 行业情报仓",
+    "tags": [
+      "CrewAI",
+      "Multi-Agent",
+      "Streamlit"
+    ],
+    "client": "自主孵化产品",
+    "duration": "持续迭代",
+    "tech": "Python 3.11 / CrewAI 1.14 / Streamlit 1.57 / DuckDuckGo / DeepSeek V4 / Pydantic v2 / Plotly / SQLite / pytest",
+    "images": [
+      "assets/project6.png",
+      "assets/project6_1.png",
+      "assets/project6_2.png"
+    ],
+    "context": "企业做行业研究、竞品分析、热点追踪时，需要在多个信息源之间反复切换搜索、阅读、整理，耗时且容易遗漏关键情报。传统 AI 问答工具缺乏实时搜索能力，输出的行业分析往往基于过时的训练数据，无法反映最新市场动态。需要一个能自动搜索、自动分析、自动可视化的智能情报系统。",
+    "techDetails": "基于 CrewAI 多智能体编排框架构建的实时情报分析系统。架构采用 Cache-first 工作流：用户输入关键词后先查 SQLite 缓存（支持 TTL），未命中则通过 DuckDuckGo 实时搜索获取最新来源，再由 CrewAI 编排 Analyst 和 Visualizer 两个 Agent 协同工作——Analyst 基于搜索结果生成结构化行业报告（InsightReport），Visualizer 将报告转化为图表结构（ChartSpec）。系统实现了三模式稳定性保障：live 模式走完整 CrewAI 管道，fallback 模式在 LLM/Agent 失败时自动降级为规则生成的保守报告，cache 模式直接返回 SQLite 缓存结果秒级响应。数据层使用 Pydantic v2 约束所有结构化输出（SourceItem、InsightReport、ChartSpec、RunMeta、RunEvent），搜索工具内置 URL 去重和坏链接跳过机制。前端使用 Streamlit 构建交互式看板，支持运行日志、Plotly 图表、Markdown 报告、来源链接、JSON/Markdown 下载。配套预热脚本和评估脚本用于演示就绪检查。",
+    "outcome": "实现了从关键词输入到结构化情报报告的全流程自动化。用户输入研究主题后，系统自动搜索最新来源、生成行业分析报告（含执行摘要、关键发现、市场信号、竞争格局、机会与风险、置信度评分）、生成雷达图可视化、保留所有来源链接。三模式设计确保演示永不崩溃：即使 LLM 不可用也能通过 fallback 或 cache 模式给出可展示输出。支持预设关键词一键演示，报告支持 JSON 和 Markdown 格式导出。",
+    "github_url": "https://github.com/Caser-86/realtime-ai-intel-warehouse"
   },
   {
     "id": 11,
@@ -250,5 +172,86 @@
     "techDetails": "后端使用 Python / FastAPI / SQLModel / SQLite，集成 JWT 认证、bcrypt 密码哈希、admin/member 角色权限控制、统一错误响应、request_id 日志与全局异常处理。前端使用 Vue 3 + Vite + Axios。LLM 通过 OpenAI 兼容接口调用，支持 Claude / DeepSeek / GPT 等模型，实现会议纪要摘要、行动项提取、日程优化建议。功能包括会议 CRUD、任务看板（待办/进行中/已完成）、周视图日历、统计大屏，以及飞书/微信 webhook 消息推送。项目使用 Docker 多阶段构建，并包含 64 个 pytest 测试用例。",
     "outcome": "实现了会议、任务、日程一体化管理原型，支持 AI 辅助会议纪要解析与行动项提取。测试覆盖认证、权限、CRUD、错误场景与中间件，支持 docker compose up --build -d 一键部署。",
     "github_url": "https://github.com/Caser-86/ai-schedule-meeting-assistant.git"
+  },
+  {
+    "id": 6,
+    "title": "AI智能客服系统",
+    "tags": [
+      "LangChain",
+      "OpenAI",
+      "WebSockets"
+    ],
+    "client": "知名跨境电商平台",
+    "duration": "4 周",
+    "tech": "Python / FastAPI / LangChain / OpenAI API / Redis",
+    "images": [
+      "assets/project7.png"
+    ],
+    "context": "传统的人工客服面临夜间应答时延高、重复性问题占比多、人员流动频繁等严重痛点。为了解决这个问题，我们为该电商平台量身打造了多渠道智能客服系统。该系统能够直连 Shopify 与 ERP 后台，实现全天候秒级智能自动回复。",
+    "techDetails": "后端采用 FastAPI 支撑高并发 WebSockets 链接，实现打字机流式输出。对话管理底层应用 LangChain 框架，集成动态 Prompt 挂载与少样本提示词(Few-shot)。我们开发了外部工具调用能力(Tool-use)，使智能体能够在对话中主动查询物流数据库 API，并根据最新状态生成地道的外文物流追踪解答。",
+    "outcome": "上线一个月内，系统独立完成了 42% 的售前与售后咨询，人工客服介入率降低了 38%，首轮回复平均时延由 18 分钟缩短至 2 秒，极大地提升了全球买家的购物体验，并在当季度为客户节省了近 3 万元的人工运营成本。",
+    "github_url": "",
+    "hidden": true
+  },
+  {
+    "id": 7,
+    "title": "企业知识库智能检索系统",
+    "tags": [
+      "RAG",
+      "VectorDB",
+      "LlamaIndex"
+    ],
+    "client": "大型科技咨询公司",
+    "duration": "3 周",
+    "tech": "Python / LlamaIndex / Qdrant / VectorDB / HuggingFace",
+    "images": [
+      "assets/project8.png"
+    ],
+    "context": "该咨询公司内部沉淀了数十万份行业白皮书、咨询方案和技术文档，但因数据格式庞杂且零散，员工检索资料耗费时间极长。原有的关键词搜索难以满足模糊语义检索和跨文档汇总分析的要求。为此，我们搭建了私有化语义检索知识库系统。",
+    "techDetails": "采用 LlamaIndex 库作为 RAG 核心框架，通过 PDF/Markdown 精准文件解析器提取非结构化文本。使用混合检索机制 (Hybrid Search: BM25 + Vector) 配合 Qdrant 向量数据库，并使用 BGE-Reranker-Large 重排序模型，确保召回文本的高相关性。另外，通过设计 Prompt Guard 与自我修正器，杜绝了通用大模型的瞎编乱造（幻觉）。",
+    "outcome": "系统完全实现了文档检索与智能整合提炼的一体化。员工搜寻历史材料与编写行业分析框架的时间由平均 1 小时压缩到 3 分钟以内，文档资产复用率提升了 220%，极大地提升了团队交付咨询方案的吞吐能力。",
+    "github_url": "",
+    "hidden": true
+  },
+  {
+    "id": 8,
+    "title": "自动化日常财务报表机器人",
+    "tags": [
+      "RPA",
+      "n8n",
+      "Python"
+    ],
+    "client": "新零售连锁企业",
+    "duration": "2 周",
+    "tech": "n8n / Python / Playwright / PostgreSQL / DingTalk API",
+    "images": [
+      "assets/project9.png",
+      "assets/project9_1.png"
+    ],
+    "context": "该企业在全国拥有多家联营门店，每天营业结束后，运营部门需要安排专人登录 5 个不同的收银和电商平台后台，手动下载账单流水、整理合并并填报 Excel 进行日终平账。手动操作不仅繁琐，而且容易漏单、填错账目，导致审计困难。",
+    "techDetails": "基于开源工作流编排工具 n8n 构建自动化流程。通过 Playwright 编写自动化无头浏览器脚本，攻克了部分平台缺乏 API 接口的难题，稳定模拟人工扫码或账号密码登录，自动绕过基本人机校验。提取流水数据后，使用 Python 脚本进行自动化字段映射、去重与异常校验，将清洗后的数据写入集中式 PostgreSQL 数据库，最后利用模板引擎渲染出可视化的飞书/钉钉推送卡片。",
+    "outcome": "实现了 100% 的自动化对账。每天早晨 8:00 准时向管理层飞书推送精准核对的全国销售日报。运营团队每天早晨彻底释放了 2 小时的人工劳作，并且数据准确率达到 100%，规避了以往因手工处理导致对账错误而产生的额外补漏时间。",
+    "github_url": "",
+    "hidden": true
+  },
+  {
+    "id": 9,
+    "title": "多Agent协作翻译审校平台",
+    "tags": [
+      "AutoGen",
+      "Translation",
+      "Agents"
+    ],
+    "client": "出海科技企业",
+    "duration": "3.5 周",
+    "tech": "Python / AutoGen / Streamlit / GPT-4o / DeepL API",
+    "images": [
+      "assets/project10.png"
+    ],
+    "context": "科技白皮书和医学说明书的英汉互译对专业术语、行业行文规范、语境流畅度要求极高。传统的机器翻译（如 Google/DeepL）往往缺乏上下文敏感度，翻译生硬且专业词汇经常出错，人工二次润色修改量大且繁琐。",
+    "techDetails": "采用 Microsoft AutoGen 框架，构建多 Agent 协同翻译模型。设计了四个独立的智能体角色：‘译员智能体’负责初步直译；‘术语监督智能体’基于预先加载 of 行业标准双语对照术语库，强制纠正翻译中的专业术语错误；‘校对智能体’审查语法和专业学术逻辑；‘润色智能体’专注于本地化阅读体验与语言优美度润色。四个智能体在虚拟讨论室中通过多轮对话最终达成最优译文。",
+    "outcome": "该平台翻译出来的学术与科技文章，在术语准确度与语句流畅性上远超单次大模型翻译和传统翻译软件。出海企业在翻译医学设备说明书和行业白皮书时，人工修正率由 70% 骤降至 15% 以内，不仅降低了译审成本，还使文档的出海交付时效提高了 3 倍。",
+    "github_url": "",
+    "hidden": true
   }
 ]

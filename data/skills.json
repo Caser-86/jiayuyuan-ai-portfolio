@@ -24,7 +24,7 @@
     "description": "擅长 RAG 检索增强生成，熟练运用 LlamaIndex、Qdrant、pgvector、Embedding 与重排序模型搭建私有化语义检索知识库；覆盖文档解析、混合检索、幻觉抑制与跨文档汇总分析。",
     "proficiency": 90,
     "order": 2,
-    "hidden": false
+    "hidden": true
   },
   {
     "id": 3,
