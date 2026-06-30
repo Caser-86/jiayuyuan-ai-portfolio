@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": 0,
+    "title": "ai-tools-battle-video",
+    "description": "基于 Remotion 的可复用 AI 工具六边形战力对比视频生成器。当前主题对比 ChatGPT、Claude、Gemini、DeepSeek、Codex、Grok 六大 AI 工具在理解、写作、代码、推理、多模态、生态六个维度的战力表现，以动态六边形可视化形式呈现'谁才是真正的六边形战士'，输出 30 秒和 60 秒两个成片。",
+    "tech_stack": "Remotion, React 19, TypeScript, Tailwind CSS, Node.js, ESLint, Prettier",
+    "video_url": "assets/video_0.mp4",
+    "thumbnail_url": "assets/video_0_thumb.jpg",
+    "tags": ["AI对比", "Remotion", "React", "视频生成", "ChatGPT", "Claude", "Gemini", "DeepSeek", "Codex", "Grok"]
+  }
+]
