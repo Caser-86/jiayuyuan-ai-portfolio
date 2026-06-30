@@ -578,12 +578,14 @@ class VideoWorkSchema(BaseModel):
     video_url: str = Field(default="", max_length=500)
     thumbnail_url: str = Field(default="", max_length=500)
     tags: List[str] = Field(default=[], max_length=20)
+    hidden: bool = Field(default=False)
 
 
 @app.get("/api/video-works")
 def get_video_works():
-    """获取所有视频作品"""
-    return read_json_file(VIDEO_WORKS_FILE, [])
+    """获取所有未隐藏的视频作品（前端公开接口）"""
+    works = read_json_file(VIDEO_WORKS_FILE, [])
+    return [w for w in works if not w.get("hidden", False)]
 
 
 @app.post("/api/video-works")
@@ -599,7 +601,8 @@ def create_video_work(work: VideoWorkSchema, authenticated: bool = Depends(verif
             "tech_stack": work.tech_stack,
             "video_url": work.video_url,
             "thumbnail_url": work.thumbnail_url,
-            "tags": work.tags
+            "tags": work.tags,
+            "hidden": work.hidden
         }
         works.append(new_work)
         _write_json_unlocked(VIDEO_WORKS_FILE, works)
@@ -626,10 +629,30 @@ def update_video_work(work_id: int, work: VideoWorkSchema, authenticated: bool =
             "tech_stack": work.tech_stack,
             "video_url": works[target_index].get("video_url", ""),
             "thumbnail_url": works[target_index].get("thumbnail_url", ""),
-            "tags": work.tags
+            "tags": work.tags,
+            "hidden": work.hidden
         }
         _write_json_unlocked(VIDEO_WORKS_FILE, works)
     return {"success": True, "message": "视频作品更新成功"}
+
+
+@app.get("/api/admin/video-works")
+def get_admin_video_works(authenticated: bool = Depends(verify_admin)):
+    """获取所有视频作品包括已隐藏的（管理后台接口）"""
+    return read_json_file(VIDEO_WORKS_FILE, [])
+
+
+@app.post("/api/video-works/{work_id}/toggle-hidden")
+def toggle_video_work_hidden(work_id: int, authenticated: bool = Depends(verify_admin)):
+    """切换视频作品的隐藏/显示状态"""
+    with _file_lock:
+        works = read_json_file(VIDEO_WORKS_FILE, [], _locked=True)
+        for w in works:
+            if w.get("id") == work_id:
+                w["hidden"] = not w.get("hidden", False)
+                _write_json_unlocked(VIDEO_WORKS_FILE, works)
+                return {"success": True, "hidden": w["hidden"], "message": "视频作品已隐藏" if w["hidden"] else "视频作品已显示"}
+        raise HTTPException(status_code=404, detail="未找到该视频作品")
 
 
 @app.delete("/api/video-works/{work_id}")

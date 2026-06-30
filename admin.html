@@ -1207,6 +1207,10 @@
                         </button>
                         <input type="file" id="vw-thumb-file" class="hidden-file-input" accept="image/*" onchange="uploadVideoWorkThumbnail(this)">
                     </div>
+                    <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="vw-hidden" style="width:18px;height:18px;cursor:pointer;">
+                        <label for="vw-hidden" style="cursor:pointer;font-size:0.9rem;color:var(--text-main);">在前端隐藏该视频作品</label>
+                    </div>
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
                         <button type="button" class="btn" onclick="closeVideoWorkModal()" style="background-color: #f1f5f9; color: var(--text-main);">取消</button>
                         <button type="submit" class="btn btn-primary">保存</button>
@@ -2093,11 +2097,13 @@
 
         async function fetchVideoWorks() {
             try {
-                const res = await fetch('/api/video-works');
+                const res = await fetch('/api/admin/video-works', { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('获取失败');
                 videoWorks = await res.json();
                 renderVideoWorks();
             } catch (err) {
                 console.error('获取视频作品失败:', err);
+                showToast('获取视频作品失败', 'error');
             }
         }
 
@@ -2124,19 +2130,27 @@
                 // 标签
                 const tagsHtml = (work.tags || []).map(t => `<span style="display:inline-block;padding:2px 10px;background:var(--primary-light);color:var(--primary);border-radius:12px;font-size:0.75rem;margin-right:4px;">${escapeHtml(t)}</span>`).join('');
 
+                const hiddenBadge = work.hidden
+                    ? `<span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:12px;font-size:0.75rem;margin-left:8px;white-space:nowrap;">已隐藏</span>`
+                    : '';
+
                 card.innerHTML = `
                     ${thumbHtml}
                     <div style="padding:16px;">
                         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
                             <h3 style="font-family:var(--font-title);font-size:1.1rem;color:var(--text-main);margin:0;flex:1;">${escapeHtml(work.title)}</h3>
                             <span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:12px;font-size:0.8rem;white-space:nowrap;margin-left:8px;">视频 ${work.id + 1}</span>
+                            ${hiddenBadge}
                         </div>
                         ${tagsHtml ? `<div style="margin-bottom:8px;">${tagsHtml}</div>` : ''}
                         <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:8px;line-height:1.5;">${escapeHtml(work.description || '暂无简介')}</p>
                         ${work.tech_stack ? `<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;"><strong>技术:</strong> ${escapeHtml(work.tech_stack)}</p>` : ''}
-                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
                             <button class="btn" onclick="openEditVideoWorkModal(${work.id})" style="background:var(--primary);color:#fff;font-size:0.85rem;padding:8px 16px;">
                                 <i data-lucide="edit-3"></i> 编辑
+                            </button>
+                            <button class="btn" onclick="toggleVideoWorkHidden(${work.id})" style="background:${work.hidden ? '#f0fdf4' : '#fef3c7'};color:${work.hidden ? '#16a34a' : '#d97706'};font-size:0.85rem;padding:8px 16px;">
+                                <i data-lucide="${work.hidden ? 'eye' : 'eye-off'}"></i> ${work.hidden ? '显示' : '隐藏'}
                             </button>
                             <button class="btn" onclick="deleteVideoWork(${work.id})" style="background-color:#fee2e2;color:#dc2626;font-size:0.85rem;padding:8px 16px;">
                                 <i data-lucide="trash-2"></i> 删除
@@ -2156,6 +2170,7 @@
             document.getElementById('vw-tags').value = '';
             document.getElementById('vw-description').value = '';
             document.getElementById('vw-tech').value = '';
+            document.getElementById('vw-hidden').checked = false;
             document.getElementById('vw-video-status').innerText = '尚未上传视频';
             document.getElementById('vw-video-btn-text').innerText = '上传视频';
             document.getElementById('vw-thumb-status').innerText = '尚未上传封面';
@@ -2173,6 +2188,7 @@
             document.getElementById('vw-tags').value = (work.tags || []).join(', ');
             document.getElementById('vw-description').value = work.description || '';
             document.getElementById('vw-tech').value = work.tech_stack || '';
+            document.getElementById('vw-hidden').checked = !!work.hidden;
 
             if (work.video_url) {
                 document.getElementById('vw-video-status').innerText = `已上传: ${work.video_url}`;
@@ -2205,7 +2221,8 @@
                 title: document.getElementById('vw-title').value,
                 tags: document.getElementById('vw-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
                 description: document.getElementById('vw-description').value.trim(),
-                tech_stack: document.getElementById('vw-tech').value.trim()
+                tech_stack: document.getElementById('vw-tech').value.trim(),
+                hidden: document.getElementById('vw-hidden').checked
             };
 
             try {
@@ -2235,6 +2252,30 @@
                 if (data.success) {
                     showToast(id !== '' ? '视频作品已更新' : '视频作品已创建', 'success');
                     closeVideoWorkModal();
+                    fetchVideoWorks();
+                } else {
+                    showToast(data.detail || '操作失败', 'error');
+                }
+            } catch (err) {
+                showToast('网络请求异常，操作失败', 'error');
+            }
+        }
+
+        async function toggleVideoWorkHidden(workId) {
+            try {
+                const res = await fetch(`/api/video-works/${workId}/toggle-hidden`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                if (res.status === 401) {
+                    showToast('管理员授权过期，请重新登录', 'error');
+                    sessionStorage.removeItem('admin_password');
+                    showLoginOverlay();
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
                     fetchVideoWorks();
                 } else {
                     showToast(data.detail || '操作失败', 'error');

@@ -6,6 +6,7 @@
     "tech_stack": "Remotion, React 19, TypeScript, Tailwind CSS, Node.js, ESLint, Prettier",
     "video_url": "assets/video_0.mp4",
     "thumbnail_url": "assets/video_0_thumb.jpg",
-    "tags": ["AI对比", "Remotion", "React", "视频生成", "ChatGPT", "Claude", "Gemini", "DeepSeek", "Codex", "Grok"]
+    "tags": ["AI对比", "Remotion", "React", "视频生成", "ChatGPT", "Claude", "Gemini", "DeepSeek", "Codex", "Grok"],
+    "hidden": true
   }
 ]

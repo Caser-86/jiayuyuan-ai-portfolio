@@ -935,6 +935,7 @@
             height: 220px;
             background-color: #0f172a;  /* 深色背景 */
             overflow: hidden;
+            cursor: pointer;
         }
 
         /* 轮播容器 */
@@ -1030,6 +1031,16 @@
 
         .portfolio-card:hover .portfolio-img {
             transform: scale(1.02);
+        }
+
+        .video-work-card .portfolio-img-wrap img {
+            transition: transform 0.3s ease;
+        }
+        .video-work-card:hover .portfolio-img-wrap img {
+            transform: scale(1.05);
+        }
+        .video-work-card:hover .video-play-overlay {
+            transform: translate(-50%, -50%) scale(1.1);
         }
 
         .portfolio-overlay {
@@ -3110,10 +3121,10 @@
             const tagsHtml = (work.tags || []).map(t => `<span class="modal-tag">${escapeHtml(t)}</span>`).join('');
 
             return `
-                <div class="portfolio-card reveal-element" onclick="openVideoPlayModal(${work.id})" style="cursor:pointer;">
-                    <div class="portfolio-img-wrap" style="position:relative;">
+                <div class="portfolio-card reveal-element video-work-card" data-video-work-id="${work.id}" style="cursor:pointer;">
+                    <div class="portfolio-img-wrap" style="position:relative;overflow:hidden;">
                         ${thumbHtml}
-                        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(255,255,255,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                        <div class="video-play-overlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(255,255,255,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.3);pointer-events:none;transition:transform 0.3s;">
                             <i data-lucide="play" style="width:28px;height:28px;color:var(--primary);margin-left:4px;"></i>
                         </div>
                     </div>
@@ -3127,14 +3138,17 @@
         }
 
         function renderVideoWorks(works) {
+            const section = document.getElementById('video-works');
             const grid = document.getElementById('video-works-grid');
             if (!grid) return;
 
             if (works.length === 0) {
-                grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:3rem;">暂无视频作品</p>';
+                if (section) section.style.display = 'none';
+                grid.innerHTML = '';
                 return;
             }
 
+            if (section) section.style.display = '';
             grid.innerHTML = works.map(w => createVideoWorkCardHTML(w)).join('');
             lucide.createIcons();
             grid.querySelectorAll('.reveal-element').forEach(el => revealObserver.observe(el));
@@ -3196,6 +3210,18 @@
                 if (modal.classList.contains('active')) closeVideoPlayModal();
             }
         });
+
+        // 视频作品事件委托（替代内联 onclick，更可靠）
+        const videoWorksGrid = document.getElementById('video-works-grid');
+        if (videoWorksGrid) {
+            videoWorksGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.video-work-card');
+                if (!card) return;
+                const workId = parseInt(card.getAttribute('data-video-work-id'), 10);
+                if (isNaN(workId)) return;
+                openVideoPlayModal(workId);
+            });
+        }
 
         // 页面就绪后拉取视频作品
         fetchAndRenderVideoWorks();
@@ -3724,10 +3750,17 @@
         // 使用事件委托：监听 portfolio-grid 容器上的点击，动态卡片也能响应
         const portfolioGrid = document.getElementById('portfolio-grid');
         portfolioGrid.addEventListener('click', (e) => {
-            const btn = e.target.closest('.view-details-btn, .portfolio-link');
-            if (!btn) return;
+            // 轮播控件和演示按钮保持原有行为，不打开详情
+            if (e.target.closest('.carousel-arrow, .carousel-dot, .portfolio-demo-btn')) return;
+
+            const card = e.target.closest('.portfolio-card');
+            if (!card) return;
+
+            const idxAttr = card.getAttribute('data-project-index');
+            if (idxAttr === null || idxAttr === '') return;
+
             e.preventDefault();
-            const idx = parseInt(btn.getAttribute('data-project-index'));
+            const idx = parseInt(idxAttr, 10);
             openModal(idx);
         });
 
